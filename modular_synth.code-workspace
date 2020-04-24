@@ -1,0 +1,19 @@
+{
+	"folders": [
+		{"path": "."}
+	],
+	"settings": {
+		"cquery.cacheDirectory": "${workspaceFolder}/.vscode/cquery_cached_index/",
+		"cmake.buildDirectory": "${workspaceFolder}/build/${buildType}",
+		"cmake.generator": "Ninja",
+		"cmake.mingwSearchDirs": ["C:\\msys64\\mingw64"],
+		"cmake.configureSettings": {
+			"CMAKE_MODULE_PATH":"C:/tools/cmake-modules",
+			"CMAKE_INSTALL_PREFIX":"C:/src/modular_synth/install",
+			"CMAKE_PREFIX_PATH":"C:/JUCE",
+			"CMAKE_TOOLCHAIN_FILE":"C:/vcpkg/scripts/buildsystems/vcpkg.cmake",
+			"CLION_PROJECT":"ON",
+			"TESTS_ENABLED":"OFF",
+		}
+	},
+}
