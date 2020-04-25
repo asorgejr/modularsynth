@@ -24,8 +24,10 @@ void SliderPanel::paint(Graphics &g) {
 
 void SliderPanel::resized() {
   auto bounds = getLocalBounds();
+  auto width = bounds.getWidth() * 0.7f;
+  auto height = bounds.getHeight() * 0.7f;
   slider.setRange(1.0f, 16.0f, 1.0f);
-  slider.centreWithSize(bounds.toFloat().getWidth() * 0.7f, bounds.toFloat().getWidth() * 0.7f);
+  slider.centreWithSize((int32)width, (int32)height);
 }
 
 Component *SliderPanel::guest() { return this; }

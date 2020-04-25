@@ -4,7 +4,6 @@ project(ModularSynth
   DESCRIPTION "A badass Synthesizer...someday"
   LANGUAGES CXX
 )
-set(CMAKE_CXX_STANDARD 20)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 message(STATUS "System: ${CMAKE_SYSTEM}")
@@ -117,6 +116,7 @@ set(SOURCES "${sSOURCES}" "${sHEADERS}")
 
 ####+ Generate Executables ####
 add_executable(${PROJECT_NAME} WIN32 ${CMAKE_SOURCE_DIR}/app/Main.cpp ${SOURCES})
+set_property(TARGET ${PROJECT_NAME} PROPERTY CMAKE_CXX_STANDARD 20)
 add_dependencies(${PROJECT_NAME} libmodularsynth)
 set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE TRUE)
 target_link_libraries(${PROJECT_NAME}

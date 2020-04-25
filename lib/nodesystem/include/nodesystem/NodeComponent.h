@@ -6,7 +6,7 @@
 
 namespace nodesystem {
 
-class NodeDefinition;
+struct NodeDefinition;
 
 class NodeComponent : public std::enable_shared_from_this<NodeComponent>,
   public Component, public Graph::NodeListener {

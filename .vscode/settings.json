@@ -1,3 +1,37 @@
 {
-    "C_Cpp.default.configurationProvider": "vector-of-bool.cmake-tools"
+    "cmake.generator": "Ninja",
+    "cmake.buildDirectory": "${workspaceFolder}/build/${buildType}",
+    "cmake.mingwSearchDirs": ["C:\\msys64\\mingw64"],
+    "cmake.configureSettings": {
+        "CMAKE_MODULE_PATH":"C:/tools/cmake-modules",
+        "CMAKE_INSTALL_PREFIX":"C:/src/modular_synth/install",
+        "CMAKE_PREFIX_PATH":"C:/JUCE",
+        "CMAKE_TOOLCHAIN_FILE":"C:/vcpkg/scripts/buildsystems/vcpkg.cmake",
+        "CMAKE_CXX_STANDARD": "20",
+        "CLION_PROJECT":"ON",
+        "TESTS_ENABLED":"OFF",
+    },
+    "cmake.configureArgs": ["-LH"],
+    "cquery.cacheDirectory": "${workspaceFolder}/.vscode/cquery_cached_index/",
+    "C_Cpp.default.intelliSenseMode": "msvc-x64",
+    "C_Cpp.intelliSenseEngineFallback": "Disabled",
+    "C_Cpp.default.cStandard": "c11",
+    "cquery.completion.include.whitelistLiteralEnding": [
+        ".h",
+        ".hpp",
+        ".hh"
+    ],
+    "cquery.index.whitelist": [
+        "${workspaceFolder}/app/**/*",
+        "${workspaceFolder}/lib/**/*",
+        "${workspaceFolder}/src/**/*",
+        "${workspaceFolder}/build/**/JuceLibraryCode/*"
+    ],
+    "cquery.codeLens.onLocalVariables": false,
+    "files.associations": {
+        "*.shader": "shaderlab",
+        "*.uss": "css",
+        "*.uxml": "xml",
+        "string": "cpp"
+    },
 }
