@@ -12,13 +12,13 @@ NodeComponent::NodeComponent(const GraphViewTheme &theme, Graph::Node *model)
 
   cNodeBackgroundCurrent = theme.cNodeBackground;
 
-  for (auto i = 0; i < model->ins.size(); i++) {
-    auto pin = make_unique<PinComponent>(this, model->ins[i].get());
+  for (auto & in : model->ins) {
+    auto pin = make_unique<PinComponent>(this, in.get());
     ins.push_back(move(pin));
   }
 
-  for (auto i = 0; i < model->outs.size(); i++) {
-    auto pin = make_unique<PinComponent>(this, model->outs[i].get());
+  for (auto & out : model->outs) {
+    auto pin = make_unique<PinComponent>(this, out.get());
     outs.push_back(move(pin));
   }
 

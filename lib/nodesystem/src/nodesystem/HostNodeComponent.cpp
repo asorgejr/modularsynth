@@ -1,11 +1,13 @@
 #include "../../include/nodesystem/HostNodeComponent.h"
 #include "../../include/nodesystem/NodeDefinition.h"
+#include "../../include/nodesystem/NodeSystemAPI.h"
+
+using namespace std;
 
 namespace nodesystem {
 
-HostNodeComponent::HostNodeComponent(const GraphViewTheme &theme, Graph::Node *model,
-                                     std::unique_ptr<GraphNodeEditor> editor) :
-  NodeComponent(theme, model), editor(std::move(editor)) {
+HostNodeComponent::HostNodeComponent(const GraphViewTheme &theme, Graph::Node *model, unique_ptr<GraphNodeEditor> editor) :
+NodeComponent(theme, model), editor(move(editor)) {
   this->editor->setModel(model);
 }
 

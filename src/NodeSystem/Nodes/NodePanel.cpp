@@ -64,7 +64,9 @@ void TextPanel::onData(const Graph::Node *sourceNode, const Graph::Pin *sourcePi
 
 Component* TextPanel::guest() { return this; }
 
-void TextPanel::setModel(Graph::Node *model) { this->model = model; }
+void TextPanel::setModel(Graph::Node *model) {
+  this->model = model;
+}
 
 #pragma endregion TextPanel
 }

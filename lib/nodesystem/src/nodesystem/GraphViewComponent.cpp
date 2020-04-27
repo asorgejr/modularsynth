@@ -20,14 +20,15 @@ void GraphViewComponent::paint(Graphics &g) {
 
 void GraphViewComponent::resized() {}
 
+#pragma region Add Remove Methods
 
 NodeComponent *GraphViewComponent::addNode(const string &name, const int ins, const int outs, const Point<float> position) {
   auto maxNumPins = max(ins, outs);
   auto w = (maxNumPins * theme.pinWidth) + ((maxNumPins + 1) * theme.pinSpacing);
-
   auto model = graph->addNode(name, ins, outs);
-
+  
   auto node = std::make_unique<NodeComponent>(theme, model);
+  
   node->setBounds(0, 0, w, theme.nodeHeight);
   node->translation = AffineTransform::translation(position);
   node->scale = AffineTransform::scale(theme.initialScaleFactor);
@@ -43,11 +44,8 @@ NodeComponent *GraphViewComponent::addNode(const string &name, const int ins, co
   return ptr;
 }
 
-HostNodeComponent 
-*GraphViewComponent::addHostNode(unique_ptr<GraphNodeEditor> editor,
-  const int ins, const int outs,
-  const int width, const int height,
-  const Point<float> position)
+HostNodeComponent *GraphViewComponent
+::addHostNode(unique_ptr<GraphNodeEditor> editor, const int ins, const int outs, const int width, const int height, const Point<float> position)
 {
   const auto model = graph->addNode("GraphNodeEditor", ins, outs);
   auto node = make_unique<HostNodeComponent>(theme, model, move(editor));
@@ -65,7 +63,6 @@ HostNodeComponent
 
   return ptr;
 }
-
 
 void GraphViewComponent::removeNode(NodeComponent *n) {
   n->removeMouseListener(mouseListener.get());
@@ -100,7 +97,6 @@ void GraphViewComponent::removeNode(NodeComponent *n) {
 
 WireComponent *GraphViewComponent::addWire(NodeComponent::PinComponent *source, NodeComponent::PinComponent *target) {
   const auto model = graph->addWire(source->model, target->model);
-
   auto wire = make_unique<WireComponent>(theme, source, target, model);
 
   calculateWireBounds(wire.get());
@@ -138,6 +134,70 @@ void GraphViewComponent::assertions() const {
   jassert(graph->nodes.size() == nodes.size());
 }
 
+void GraphViewComponent::duplicate() {
+  vector<tuple<NodeComponent *, int, int>> nodesToAdd;
+
+  for (auto &n : nodes) {
+    if (n->selected) {
+      nodesToAdd.push_back(tuple<NodeComponent *, int, int>(n.get(), n->ins.size(), n->outs.size()));
+    }
+  }
+
+  for (auto &t : nodesToAdd) {
+    NodeComponent *n;
+    int ins = 0, outs = 0;
+    tie(n, ins, outs) = t;
+    if (dynamic_cast<HostNodeComponent *>(n)) {
+      printf("not supported for now\n");
+    } else {
+      addNode(n->model->name + "-copy", ins, outs);
+    }
+  }
+}
+
+//! usually throws a fat exception: Access Violation when calling removeNode()
+void GraphViewComponent::removeSelected() {
+  // remove wires first
+  vector<WireComponent *> wiresToDelete;
+  for (auto &w : wires) {
+    if (w->selected) {
+      wiresToDelete.push_back(w.get());
+    }
+  }
+  for (auto &w : wiresToDelete) {
+    removeWire(w);
+  }
+  nodeMultiSelectionOn = false;
+
+  // then remove nodes
+  vector<NodeComponent *> nodesToDelete;
+
+  for (auto &n : nodes) {
+    if (n->selected) {
+      nodesToDelete.push_back(n.get());
+    }
+  }
+  for (auto &n : nodesToDelete) removeNode(n);
+  wireMultiSelectionOn = false;
+}
+
+void GraphViewComponent::selectAll() {
+  for (auto &n : nodes) {
+    n->selected = true;
+  }
+  nodeMultiSelectionOn = true;
+
+  for (auto &w : wires) {
+    w->selected = true;
+  }
+  wireMultiSelectionOn = true;
+
+  repaint();
+}
+
+#pragma endregion Add Remove Methods
+
+#pragma region Pin Mouse Events
 
 void GraphViewComponent::pinMouseDrag(NodeComponent::PinComponent *pin, const MouseEvent &e) {
   auto relativeEvent = e.getEventRelativeTo(this);
@@ -170,6 +230,10 @@ void GraphViewComponent::pinMouseEnter(NodeComponent::PinComponent *pin, const M
 
 }
 
+#pragma endregion Pin Mouse Events
+
+#pragma region Wire Methods
+
 void GraphViewComponent::drawConnector(NodeComponent::PinComponent *pin) {
   if (wireDrawer->startPin && wireDrawer->startPin != pin) {
 
@@ -186,6 +250,66 @@ bool GraphViewComponent::isLegalWire(NodeComponent::PinComponent *start, NodeCom
   auto existing = find_if(wires.begin(), wires.end(), [&](auto &w) -> bool { return w->isConnecting(start, end); });
   return existing == wires.end() && start->model->pinType != end->model->pinType && start->node != end->node;
 }
+
+void GraphViewComponent::calculateWireBounds(WireComponent *wire) {
+  auto startPin = wire->startPin;
+  auto endPin = wire->endPin;
+
+  auto startPinTopLeft = getLocalPoint(startPin, Point<int>(0, 0));
+  auto endPinTopLeft = getLocalPoint(endPin, Point<int>(0, 0));
+
+  auto startPinBottomRight = getLocalPoint(startPin, Point<int>(startPin->getWidth(), startPin->getHeight()));
+  auto endPinBottomRight = getLocalPoint(endPin, Point<int>(endPin->getWidth(), endPin->getHeight()));
+
+
+  auto left = std::min(startPinTopLeft.x, endPinTopLeft.x);
+  auto right = std::max(startPinBottomRight.x, endPinBottomRight.x);
+  auto top = std::min(startPinTopLeft.y, endPinTopLeft.y);
+  auto bottom = std::max(startPinBottomRight.y, endPinBottomRight.y);
+
+  auto w = right - left;
+  auto h = bottom - top;
+
+  wire->inverted = !(left == startPinTopLeft.x);
+
+
+  wire->setBounds(left, top, w, h);
+}
+
+void GraphViewComponent::wireMouseDown(WireComponent *wire, const MouseEvent &e) {
+  if (!e.mods.isShiftDown() && wireMultiSelectionOn && !wire->selected) {
+    wireMultiSelectionOn = false;
+  }
+
+  wire->selected = !wire->selected;
+  wire->repaint();
+
+  if (!e.mods.isShiftDown() && !wireMultiSelectionOn) {
+
+    for (auto &w : wires) {
+      if (w.get() != wire) {
+        w->selected = false;
+        w->repaint();
+      }
+    }
+
+    ////
+    for (auto &n : nodes) {
+      n->selected = false;
+      n->repaint();
+    }
+    ////
+
+  } else {
+    wireMultiSelectionOn = true;
+  }
+}
+
+void GraphViewComponent::wireMouseUp(WireComponent *wire, const MouseEvent &e) {}
+
+#pragma endregion Wire Methods
+
+#pragma region Node Mouse Events
 
 void GraphViewComponent::nodeMouseDrag(NodeComponent *node, const MouseEvent &e) {
   node->selected = true;
@@ -254,71 +378,9 @@ void GraphViewComponent::nodeMouseUp(NodeComponent *node, const MouseEvent &e) {
   recordState();
 }
 
-void GraphViewComponent::wireMouseDown(WireComponent *wire, const MouseEvent &e) {
-  if (!e.mods.isShiftDown() && wireMultiSelectionOn && !wire->selected) {
-    wireMultiSelectionOn = false;
-  }
+#pragma endregion Node Mouse Events
 
-  wire->selected = !wire->selected;
-  wire->repaint();
-
-  if (!e.mods.isShiftDown() && !wireMultiSelectionOn) {
-
-    for (auto &w : wires) {
-      if (w.get() != wire) {
-        w->selected = false;
-        w->repaint();
-      }
-    }
-
-    ////
-    for (auto &n : nodes) {
-      n->selected = false;
-      n->repaint();
-    }
-    ////
-
-  } else {
-    wireMultiSelectionOn = true;
-  }
-}
-
-
-void GraphViewComponent::calculateWireBounds(WireComponent *wire) {
-  auto startPin = wire->startPin;
-  auto endPin = wire->endPin;
-
-  auto startPinTopLeft = getLocalPoint(startPin, Point<int>(0, 0));
-  auto endPinTopLeft = getLocalPoint(endPin, Point<int>(0, 0));
-
-  auto startPinBottomRight = getLocalPoint(startPin, Point<int>(startPin->getWidth(), startPin->getHeight()));
-  auto endPinBottomRight = getLocalPoint(endPin, Point<int>(endPin->getWidth(), endPin->getHeight()));
-
-
-  auto left = std::min(startPinTopLeft.x, endPinTopLeft.x);
-  auto right = std::max(startPinBottomRight.x, endPinBottomRight.x);
-  auto top = std::min(startPinTopLeft.y, endPinTopLeft.y);
-  auto bottom = std::max(startPinBottomRight.y, endPinBottomRight.y);
-
-  auto w = right - left;
-  auto h = bottom - top;
-
-  wire->inverted = !(left == startPinTopLeft.x);
-
-
-  wire->setBounds(left, top, w, h);
-}
-
-void GraphViewComponent::wireMouseUp(WireComponent *wire, const MouseEvent &e) {}
-
-void GraphViewComponent::recordState() {
-  for (auto &n : nodes) {
-    auto p = getLocalPoint(n.get(), Point<int>(0, 0));
-    n->translation = AffineTransform::translation(p);
-    n->scale = AffineTransform::scale(n->scaleFactor);
-  }
-
-}
+#pragma region Input and Mouse Events
 
 void GraphViewComponent::mouseDown(const MouseEvent &e) {
   if (e.mods.isPopupMenu()) {
@@ -383,7 +445,6 @@ void GraphViewComponent::mouseUp(const MouseEvent &e) {
   removeChildComponent(selector.get());
 }
 
-
 bool GraphViewComponent::keyPressed(const KeyPress &key) {
   auto code = key.getKeyCode();
   auto commandDown = key.getModifiers().isCommandDown();
@@ -419,6 +480,10 @@ bool GraphViewComponent::keyPressed(const KeyPress &key) {
 
   return true;
 }
+
+#pragma endregion Input and Mouse Events
+
+#pragma region View Events
 
 void GraphViewComponent::zoomIn() {
   recordState();
@@ -469,100 +534,15 @@ void GraphViewComponent::zoomToOriginalSize() {
   }
 }
 
-// TODO: usually throws a fat exception: Access Violation when calling removeNode()
-void GraphViewComponent::removeSelected() {
-  // remove wires first
-  vector<WireComponent *> wiresToDelete;
-  for (auto &w : wires) {
-    if (w->selected) {
-      wiresToDelete.push_back(w.get());
-    }
-  }
-  for (auto &w : wiresToDelete) {
-    removeWire(w);
-  }
-  nodeMultiSelectionOn = false;
+#pragma endregion View Events
 
-  // then remove nodes
-  vector<NodeComponent *> nodesToDelete;
-
+void GraphViewComponent::recordState() {
   for (auto &n : nodes) {
-    if (n->selected) {
-      nodesToDelete.push_back(n.get());
-    }
-  }
-  for (auto &n : nodesToDelete) removeNode(n);
-  wireMultiSelectionOn = false;
-}
-
-void GraphViewComponent::selectAll() {
-  for (auto &n : nodes) {
-    n->selected = true;
-  }
-  nodeMultiSelectionOn = true;
-
-  for (auto &w : wires) {
-    w->selected = true;
-  }
-  wireMultiSelectionOn = true;
-
-  repaint();
-}
-
-void GraphViewComponent::duplicate() {
-  vector<tuple<NodeComponent *, int, int>> nodesToAdd;
-
-  for (auto &n : nodes) {
-    if (n->selected) {
-      nodesToAdd.push_back(tuple<NodeComponent *, int, int>(n.get(), n->ins.size(), n->outs.size()));
-    }
+    auto p = getLocalPoint(n.get(), Point<int>(0, 0));
+    n->translation = AffineTransform::translation(p);
+    n->scale = AffineTransform::scale(n->scaleFactor);
   }
 
-  for (auto &t : nodesToAdd) {
-    NodeComponent *n;
-    int ins = 0, outs = 0;
-    tie(n, ins, outs) = t;
-    if (dynamic_cast<HostNodeComponent *>(n)) {
-      printf("not supported for now\n");
-    } else {
-      addNode(n->model->name + "-copy", ins, outs);
-    }
-  }
-}
-
-
-GraphViewComponent::ChildrenMouseListener::ChildrenMouseListener(GraphViewComponent *view) : view(view) {}
-
-void GraphViewComponent::ChildrenMouseListener::mouseDown(const MouseEvent &e) {
-  if (auto node = dynamic_cast<NodeComponent *>(e.originalComponent)) {
-    view->nodeMouseDown(node, e);
-  } else if (auto wire = dynamic_cast<WireComponent *>(e.originalComponent)) {
-    view->wireMouseDown(wire, e);
-  }
-}
-
-void GraphViewComponent::ChildrenMouseListener::mouseUp(const MouseEvent &e) {
-  if (auto node = dynamic_cast<NodeComponent *>(e.originalComponent)) {
-    view->nodeMouseUp(node, e);
-  } else if (auto pin = dynamic_cast<NodeComponent::PinComponent *>(e.originalComponent)) {
-    view->pinMouseUp(pin, e);
-  } else if (auto wire = dynamic_cast<WireComponent *>(e.originalComponent)) {
-    view->wireMouseUp(wire, e);
-  }
-}
-
-void GraphViewComponent::ChildrenMouseListener::mouseDrag(const MouseEvent &e) {
-  if (auto node = dynamic_cast<NodeComponent *>(e.originalComponent)) {
-    view->nodeMouseDrag(node, e);
-  } else if (auto pin = dynamic_cast<NodeComponent::PinComponent *>(e.originalComponent)) {
-    view->pinMouseDrag(pin, e);
-  }
-}
-
-void GraphViewComponent::ChildrenMouseListener::mouseEnter(const MouseEvent &e) {
-  if (auto pin = dynamic_cast<NodeComponent::PinComponent *>(e.originalComponent)) {
-    view->pinMouseEnter(pin, e);
-  }
 }
 
 }

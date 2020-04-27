@@ -19,6 +19,8 @@ const std::string kApplicationName = "ModularSynth";
 /// The version of the application.
 const std::string kApplicationVersion = "0.1.0";
 
+const int32 samplesPerBlock = 4096;
+
 static void Init() {
   Palette();
   Layout();

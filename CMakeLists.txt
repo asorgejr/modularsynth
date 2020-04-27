@@ -5,7 +5,7 @@ project(ModularSynth
   LANGUAGES CXX
 )
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-
+set(CMAKE_CXX_STANDARD 20) # MSVC rejects designated initializers below c++20. 
 message(STATUS "System: ${CMAKE_SYSTEM}")
 
 
@@ -16,6 +16,8 @@ option(CLION_PROJECT "Enables libraries to build in a way which CLion is compati
 
 cmake_policy(SET CMP0079 NEW)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+add_definitions(-DNODESYSTEM_DEBUG)
 
 
 ####+ Library Import ####
@@ -44,32 +46,6 @@ endif()
 
 
 ####+ Project Library ####
-#set(LIBDIR "${CMAKE_SOURCE_DIR}/lib")
-#set(LIBINCLDIR "${LIBDIR}/include")
-#set(LIBSRCDIR "${LIBDIR}/src")
-
-
-# libmodularsynth
-#set(LIBMODULARSYNTH_INCLUDE_DIR "${LIBINCLDIR}")
-#set(LIBMODULARSYNTH_INCLUDES "${MODULARSYNTH_INCLUDE_FILES}")
-#set(LIBMODULARSYNTH_SOURCES ${MODULARSYNTH_SOURCE_FILES})
-#add_library(libmodularsynth STATIC
-#  ${LIBMODULARSYNTH_INCLUDES} 
-#  ${LIBMODULARSYNTH_SOURCES}
-#)
-#target_link_libraries(libmodularsynth PUBLIC ${JUCE_LIBRARIES})
-
-
-# libnodesystem
-#set(LIBNODESYSTEM_INCLUDE_DIR "${LIBINCLDIR}")
-#set(LIBNODESYSTEM_INCLUDES "${NODESYSTEM_INCLUDE_FILES}")
-#set(LIBNODESYSTEM_SOURCES "${NODESYSTEM_SOURCE_FILES}")
-#add_library(libnodesystem STATIC
-#  ${LIBNODESYSTEM_INCLUDES}
-#  ${LIBNODESYSTEM_SOURCES}
-#)
-#target_link_libraries(libnodesystem PUBLIC ${JUCE_LIBRARIES})
-
 set(JUCE_COMPONENTS
   juce_audio_basics juce_audio_devices juce_audio_formats juce_audio_processors
   juce_audio_utils juce_core juce_cryptography juce_data_structures juce_events
@@ -108,7 +84,10 @@ endif()
 
 
 ####+ Project Sources ####
-file(GLOB_RECURSE sSOURCES ${CMAKE_SOURCE_DIR}/src/*.cpp)
+file(GLOB_RECURSE sSOURCES
+  ${CMAKE_SOURCE_DIR}/src/*.h
+  ${CMAKE_SOURCE_DIR}/src/*.cpp
+)
 file(GLOB_RECURSE sHEADERS ${CMAKE_SOURCE_DIR}/include/*.h)
 set(SOURCES "${sSOURCES}" "${sHEADERS}")
 
@@ -116,7 +95,6 @@ set(SOURCES "${sSOURCES}" "${sHEADERS}")
 
 ####+ Generate Executables ####
 add_executable(${PROJECT_NAME} WIN32 ${CMAKE_SOURCE_DIR}/app/Main.cpp ${SOURCES})
-set_property(TARGET ${PROJECT_NAME} PROPERTY CMAKE_CXX_STANDARD 20)
 add_dependencies(${PROJECT_NAME} libmodularsynth)
 set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE TRUE)
 target_link_libraries(${PROJECT_NAME}

@@ -8,7 +8,9 @@
 
 namespace nodesystem {
 
-struct SliderPanel : public Shareable<SliderPanel>, public Component, public GraphNodeEditor, public Slider::Listener {
+struct SliderPanel : public Shareable<SliderPanel>, public Component,
+  public GraphNodeEditor, public Slider::Listener {
+  
   SliderPanel();
 
   ~SliderPanel() override;

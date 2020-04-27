@@ -8,6 +8,9 @@
 
 namespace nodesystem {
 
+/**
+ * This defines the data model of the node graph system.
+ */
 struct Graph {
 
   enum class PinType;

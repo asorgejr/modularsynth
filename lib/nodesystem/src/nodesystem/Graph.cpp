@@ -1,7 +1,7 @@
 //
 // Created by asorgejr on 4/21/2020.
 //
-
+#include "../../include/nodesystem/NodeSystemAPI.h"
 #include "../../include/nodesystem/Graph.h"
 
 using namespace std;
@@ -12,10 +12,14 @@ Graph::Pin::Pin(const PinType &pinType, const Node *node, const int order) : pin
 
 void Graph::Pin::flow(const var &data) const {
   if (pinType == PinType::In) {
-    //printf("[flow] in-pin:%d data:%s\n", order, data.stringValue.c_str());
+#ifdef NODESYSTEM_DEBUG
+    printf("[flow] in-pin:%d data:%s\n", order, data.toString().toStdString().c_str());    //
+#endif
     node->flow(this, data);
   } else {
-    //printf("[flow] out-pin:%d data:%s\n", order, data.stringValue.c_str());
+#ifdef NODESYSTEM_DEBUG
+    printf("[flow] out-pin:%d data:%s\n", order, data.toString().toStdString().c_str());    //
+#endif
     vector<const Pin *> targets;
     node->graph->targets(this, targets);
     for (auto &p : targets) p->flow(data);
@@ -57,7 +61,9 @@ void Graph::Node::flow(const Pin *source, const var &data) const {
 }
 
 void Graph::Node::publish(const var &data) const {
-  //printf("[publish] node:%s data:%s\n", name.c_str(), data.stringValue.c_str());
+#ifdef NODESYSTEM_DEBUG
+  printf("[publish] node:%s data:%s\n", name.c_str(), data.toString().toStdString().c_str());
+#endif
   for (auto &p : outs) {
     p->flow(data);
   }
@@ -67,7 +73,10 @@ Graph::Wire::Wire(const Pin *source, const Pin *target) : source(source), target
 
 
 Graph::Node *Graph::addNode(const std::string &name, const int numIns, const int numOuts) {
-  //printf("[graph-add-node] name:%s, ins: %d, outs:%d\n", name.c_str(), numIns, numOuts);
+  
+#ifdef NODESYSTEM_DEBUG
+  printf("[graph-add-node] name:%s, ins: %d, outs:%d\n", name.c_str(), numIns, numOuts);  //
+#endif
   auto node = make_unique<Node>(this, name, numIns, numOuts);
   auto ptr = node.get();
   nodes.push_back(move(node));
@@ -75,7 +84,9 @@ Graph::Node *Graph::addNode(const std::string &name, const int numIns, const int
 }
 
 void Graph::removeNode(const Node *node) { //works
+#ifdef NODESYSTEM_DEBUG
   printf("[graph-remove-node] name:%s\n", node->name.c_str());
+#endif
   // remove all connected wires
   vector<const Wire *> wiresToRemove;
   for (auto &e : wires) {
@@ -96,8 +107,10 @@ void Graph::removeNode(const Node *node) { //works
 }
 
 const Graph::Wire *Graph::addWire(const Pin *source, const Pin *target) {
-  //printf("[graph-add-wire] source-node:%s source-pin:%d, target-node:%s, target-pin:%d\n",
-  //       source->node->name.c_str(), source->order, target->node->name.c_str(), target->order);
+#ifdef NODESYSTEM_DEBUG
+  printf("[graph-add-wire] source-node:%s source-pin:%d, target-node:%s, target-pin:%d\n",
+         source->node->name.c_str(), source->order, target->node->name.c_str(), target->order);
+#endif
   auto wire = make_unique<Wire>(source, target);
   auto ptr = wire.get();
   wires.push_back(move(wire));
@@ -105,11 +118,13 @@ const Graph::Wire *Graph::addWire(const Pin *source, const Pin *target) {
 }
 
 void Graph::removeWire(const Wire *wire) {
+#ifdef NODESYSTEM_DEBUG
   printf("[graph-remove-wire] source-node:%s source-pin:%d, target-node:%s, target-pin:%d\n",
          wire->source->node->name.c_str(),
          wire->source->order,
          wire->target->node->name.c_str(),
          wire->target->order);
+#endif
   auto removeItr = remove_if(
     begin(wires),
     end(wires),
@@ -147,7 +162,9 @@ void Graph::bfs(const Node *node, const function<void(const Node *)> &visit) con
 }
 
 void Graph::report() const {
-  printf("#nodes:%llu, #wires:%llu\n", nodes.size(), wires.size());
+#ifdef NODESYSTEM_DEBUG
+  printf("#nodes:%llu, #wires:%llu\n", nodes.size(), wires.size());  
+#endif
 }
 
 }

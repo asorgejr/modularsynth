@@ -62,37 +62,11 @@ endif()
 
 ##############? BEGIN PACKAGE CUSTOMIZATIONS ###############
 
-set(_${PKGVARNAME}_include_files
-  Graph.h
-  GraphNodeEditor.h
-  GraphViewComponent.h
-  GraphViewTheme.h
-  HostNodeComponent.h
-  NodeComponent.h
-  NodeDefinition.h
-  nodesystem.h
-  SelectionComponent.h
-  UnboundWireComponent.h
-  WireComponent.h
+file(GLOB_RECURSE "_${PKGVARNAME}_include_files" 
+  "${_${PKGVARNAME}_include_prefix}/*.h"
+  "${_${PKGVARNAME}_include_prefix}/*.hpp"
 )
-
-#set (_${PKGVARNAME}_private_include_files
-#  ""
-#)
-
-set(_${PKGVARNAME}_source_files
-  Graph.cpp
-  GraphViewComponent.cpp
-  HostNodeComponent.cpp
-  NodeComponent.cpp
-  NodeDefinition.cpp
-  SelectionComponent.cpp
-  UnboundWireComponent.cpp
-  WireComponent.cpp
-)
-list(TRANSFORM "_${PKGVARNAME}_include_files" PREPEND "${_${PKGVARNAME}_include_prefix}/")
-#list(TRANSFORM "_${PKGVARNAME}_private_include_files" PREPEND "${_${PKGVARNAME}_include_prefix}/")
-list(TRANSFORM "_${PKGVARNAME}_source_files" PREPEND "${_${PKGVARNAME}_source_prefix}/")
+file(GLOB_RECURSE _${PKGVARNAME}_source_files "${_${PKGVARNAME}_source_prefix}/*.cpp")
 
 set(SOURCES 
   "${_${PKGVARNAME}_include_files}"

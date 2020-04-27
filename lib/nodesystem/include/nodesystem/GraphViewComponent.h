@@ -1,5 +1,4 @@
 #pragma once
-
 #include <JuceHeader.h>
 #include "NodeComponent.h"
 #include "HostNodeComponent.h"
@@ -14,13 +13,19 @@ class GraphViewComponent : public Component {
 #pragma region Public Members
   
 public:
+  
   std::unique_ptr<Graph> graph;
+  
   std::vector<std::unique_ptr<NodeComponent>> nodes;
+  
   std::vector<std::unique_ptr<WireComponent>> wires;
+  
   std::unique_ptr<SelectionComponent> selector;
+  
   std::unique_ptr<UnboundWireComponent> wireDrawer;
 
   bool nodeMultiSelectionOn = false;
+  
   bool wireMultiSelectionOn = false;
 
   GraphViewTheme theme;
@@ -29,15 +34,44 @@ public:
 
     GraphViewComponent *view;
 
-    explicit ChildrenMouseListener(GraphViewComponent *view);
+    explicit ChildrenMouseListener(GraphViewComponent *view) : view(view) {}
 
-    void mouseDown(const MouseEvent &e) override;
+    #pragma region Mouse Events
 
-    void mouseUp(const MouseEvent &e) override;
+    void mouseDown(const MouseEvent &e) override {
+      if (auto node = dynamic_cast<NodeComponent *>(e.originalComponent)) {
+        view->nodeMouseDown(node, e);
+      } else if (auto wire = dynamic_cast<WireComponent *>(e.originalComponent)) {
+        view->wireMouseDown(wire, e);
+      }
+    }
 
-    void mouseDrag(const MouseEvent &e) override;
+    void mouseUp(const MouseEvent &e) override {
+      if (auto node = dynamic_cast<NodeComponent *>(e.originalComponent)) {
+        view->nodeMouseUp(node, e);
+      } else if (auto pin = dynamic_cast<NodeComponent::PinComponent *>(e.originalComponent)) {
+        view->pinMouseUp(pin, e);
+      } else if (auto wire = dynamic_cast<WireComponent *>(e.originalComponent)) {
+        view->wireMouseUp(wire, e);
+      }
+    }
 
-    void mouseEnter(const MouseEvent &e) override;
+    void mouseDrag(const MouseEvent &e) override {
+      if (auto node = dynamic_cast<NodeComponent *>(e.originalComponent)) {
+        view->nodeMouseDrag(node, e);
+      } else if (auto pin = dynamic_cast<NodeComponent::PinComponent *>(e.originalComponent)) {
+        view->pinMouseDrag(pin, e);
+      }
+    }
+
+    void mouseEnter(const MouseEvent &e) override {
+      if (auto pin = dynamic_cast<NodeComponent::PinComponent *>(e.originalComponent)) {
+        view->pinMouseEnter(pin, e);
+      }
+    }
+
+    #pragma endregion Mouse Events
+    
   };
 
   std::unique_ptr<ChildrenMouseListener> mouseListener;
@@ -47,6 +81,7 @@ public:
 #pragma region Public Methods
   
 public:
+  
   GraphViewComponent();
 
   ~GraphViewComponent() override;

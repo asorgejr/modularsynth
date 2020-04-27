@@ -4,22 +4,26 @@
 
 #pragma once
 #include <JuceHeader.h>
-#include <modularsynth/Module.h>
-namespace modularsynth {
+#include <nodesystem/nodesystem.h>
+namespace nodesystem {
 
-namespace node {
+struct WaveformNode : public GraphNodeEditor, public Component {
+  
+  AudioProcessorGraph::Node::Ptr audioNode;
 
-class WaveformNode : Module {
-  Array<AudioChannelSet> InputBuses() override {
-    return Array<AudioChannelSet>();
-  }
+  Graph::Node *model;
+  
+  WaveformNode();
 
-  Array<AudioChannelSet> OutputBuses() override {
-    return Array<AudioChannelSet>();
-  }
+  ~WaveformNode() override;
+
+  Component *guest() override;
+
+  void setModel(Graph::Node *model) override;
+
+  void onData(Graph::Node *sourceNode, Graph::Pin *sourcePin, const var &data);
 
 };
 
-}
 
 }

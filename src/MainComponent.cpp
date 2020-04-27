@@ -43,7 +43,7 @@ void MainComponent::instantiateChildren(int32 width, int32 height) {
   // addAndMakeVisible (_midiInputList);
   addAndMakeVisible(_tabComponent);
   _tabComponent.addMouseListener(_mouseListener.get(), true);
-  _modularNodeGraph = make_shared<ModularNodeGraph>(_audioDeviceManager, _mouseListener);
+  _modularNodeGraph = make_shared<ModularComponent>(_audioDeviceManager, _mouseListener);
   
   // Initialize Values for each child.
   _tabComponent.setName(thisName + Layout::kTabComponentName);

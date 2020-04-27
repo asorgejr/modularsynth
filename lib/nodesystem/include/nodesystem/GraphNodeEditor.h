@@ -6,6 +6,10 @@
 
 namespace nodesystem {
 
+/**
+ * This abstract class can be used to design a node with custom component behaviors,
+ * such as switches, faders and labels.
+ */
 class GraphNodeEditor {
 public:
 

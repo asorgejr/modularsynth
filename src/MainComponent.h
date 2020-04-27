@@ -9,7 +9,7 @@
 #include <nameof.hpp>
 
 #include "../app/config.h"
-#include "NodeSystem/ModularNodeGraph.h"
+#include "NodeSystem/ModularComponent.h"
 #include "Settings/SettingsComponent.h"
 #include "Utilities.h"
 #include "SynthKeyboardComponent.h"
@@ -29,7 +29,7 @@ protected:
   typedef LookAndFeel_V4::ColourScheme CS;
 
   struct Layout {
-    inline static const std::string kModularGraphName = "_" + (std::string) NAMEOF_TYPE(ModularNodeGraph);
+    inline static const std::string kModularGraphName = "_" + (std::string) NAMEOF_TYPE(ModularComponent);
     inline static const std::string kModularGraphTabName = "Node Graph";
     inline static const std::string kSettingsComponentName = "_" + (std::string) NAMEOF_TYPE(AudioSettingsComponent);
     inline static const std::string kSettingsTabName = "Audio Settings";
@@ -60,7 +60,7 @@ private:
   SettingsComponent _settingsView;
   SynthKeyboardComponent _synthKeyboardView;
   TabbedComponent _tabComponent;
-  std::shared_ptr<ModularNodeGraph> _modularNodeGraph;
+  std::shared_ptr<ModularComponent> _modularNodeGraph;
   Rectangle<float> floatBounds;
   inline static int _curImage = 0;
   

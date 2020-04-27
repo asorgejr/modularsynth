@@ -9,7 +9,8 @@ namespace nodesystem {
 struct NodeDefinition;
 
 class NodeComponent : public std::enable_shared_from_this<NodeComponent>,
-  public Component, public Graph::NodeListener {
+public Component, public Graph::NodeListener {
+
 #pragma region Public Members
 
 public:
@@ -38,10 +39,19 @@ public:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PinComponent)
   };
 
+  /**
+   * The theme for this NodeComponent.
+   */
   const GraphViewTheme theme;
+  /**
+   * The node data model attached to this NodeComponent.
+   */
   Graph::Node *model;
 
-
+  /**
+   * Unique references to each of the Pins specified by the Node
+   * passed into this NodeComponent via Node::ins.
+   */
   std::vector<std::unique_ptr<PinComponent>> ins;
   std::vector<std::unique_ptr<PinComponent>> outs;
 
