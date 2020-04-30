@@ -1,4 +1,8 @@
+#include "../../include/nodesystem/NodeSystemAPI.h"
 #include "../../include/nodesystem/GraphViewComponent.h"
+
+DISABLE_WARNING_PUSH
+DISABLE_WARNING_LOSS_OF_DATA
 
 using namespace std;
 
@@ -22,7 +26,8 @@ void GraphViewComponent::resized() {}
 
 #pragma region Add Remove Methods
 
-NodeComponent *GraphViewComponent::addNode(const string &name, const int ins, const int outs, const Point<float> position) {
+NodeComponent *
+GraphViewComponent::addNode(const string &name, const int ins, const int outs, const Point<float> position) {
   auto maxNumPins = max(ins, outs);
   auto w = (maxNumPins * theme.pinWidth) + ((maxNumPins + 1) * theme.pinSpacing);
   auto model = graph->addNode(name, ins, outs);
@@ -44,11 +49,11 @@ NodeComponent *GraphViewComponent::addNode(const string &name, const int ins, co
   return ptr;
 }
 
-HostNodeComponent *GraphViewComponent
-::addHostNode(unique_ptr<GraphNodeEditor> editor, const int ins, const int outs, const int width, const int height, const Point<float> position)
+HostNodeComponent *
+GraphViewComponent::addHostNode(unique_ptr<GraphNodeView> view, const int ins, const int outs, const int width, const int height, const Point<float> position)
 {
-  const auto model = graph->addNode("GraphNodeEditor", ins, outs);
-  auto node = make_unique<HostNodeComponent>(theme, model, move(editor));
+  const auto model = graph->addNode("GraphNodeView", ins, outs);
+  auto node = make_unique<HostNodeComponent>(theme, model, move(view));
   node->setBounds(0, 0, width, height);
   node->translation = AffineTransform::translation(position);
   node->scale = AffineTransform::scale(theme.initialScaleFactor);
@@ -67,7 +72,7 @@ HostNodeComponent *GraphViewComponent
 void GraphViewComponent::removeNode(NodeComponent *n) {
   n->removeMouseListener(mouseListener.get());
   // we need to do this instead of directly erasing because we have to remove the corresponding UI component as well
-  vector<WireComponent*> wiresToDelete;
+  vector<WireComponent *> wiresToDelete;
   for (auto &w : wires) {
     if (w.get()) {
       if ((w->startPin && w->startPin->node == n) || (w->endPin && w->endPin->node == n)) {
@@ -83,12 +88,22 @@ void GraphViewComponent::removeNode(NodeComponent *n) {
   auto ref = remove_if(
     nodes.begin(), nodes.end(), [&](auto &current) -> bool { return current.get() == n; }
   );
-
-  if (ref != nodes.end()) {
-    auto n = (*ref).get();
-    graph->removeNode(n->model);
-    removeChildComponent(n);
-    nodes.erase(ref, nodes.end()); // TODO: access violation
+  
+  try {
+    if (ref != nodes.end()) {
+      if (*ref == nullptr) throw exception("node not found");
+      auto n = (*ref).get();
+      graph->removeNode(n->model);
+      removeChildComponent(n);
+      nodes.erase(ref, nodes.end()); // TODO: access violation
+    }
+  } catch (exception &e) {
+    cout << "removeNode error: " << e.what() << endl;
+    for (int i = 0; i < nodes.size(); ++i) {
+      if (nodes[i].get() == nullptr) {
+        nodes.erase(nodes.begin() + i);
+      }
+    }
   }
 
   assertions();
@@ -118,13 +133,24 @@ void GraphViewComponent::removeWire(WireComponent *w) {
        return current.get() == w;
   });
 
-  if (ref != wires.end()) {
-    auto w = (*ref).get();
-    // TODO: fix this. Throws Access Violation exception. 
-    //  Make it so this method can detect when node is mid-stream with both in and out connections.
-    graph->removeWire(w->model); 
-    removeChildComponent(w);
-    wires.erase(ref, end(wires));
+  try {
+    if (ref != wires.end()) {
+      if (*ref == nullptr) throw exception("wire not found");
+      auto w = (*ref).get();
+      // TODO: fix this. Throws Access Violation exception. 
+      //  Exception happens when node has no upstream connection, but has a downstream connection.
+      //  Exception also occurs when node has both upstream and downstream.
+      graph->removeWire(w->model);
+      removeChildComponent(w);
+      wires.erase(ref, end(wires));
+    }
+  } catch (exception &e) {
+    cout << "removeWire error: " << e.what() << endl;
+    for (int i = 0; i < wires.size(); ++i) {
+      if (wires[i].get() == nullptr) {
+        wires.erase(wires.begin() + i);
+      }
+    }
   }
   assertions();
 }
@@ -372,6 +398,15 @@ void GraphViewComponent::nodeMouseDown(NodeComponent *node, const MouseEvent &e)
     nodeMultiSelectionOn = true;
   }
 
+#ifdef NODESYSTEM_DEBUG
+  for (auto &n : nodes) {
+    auto p = (NodeComponent*) n.get();
+    if (n->selected)
+      cout << "[graph-view-selected] node: address: " << n.get()
+      << " model address: " << p->model << endl;
+  }
+#endif
+
 }
 
 void GraphViewComponent::nodeMouseUp(NodeComponent *node, const MouseEvent &e) {
@@ -545,4 +580,21 @@ void GraphViewComponent::recordState() {
 
 }
 
+/**
+ * 
+ * @param wire 
+ * @return -1 if no wire reference is matched, otherwise returns the index of the wire.
+ */
+int GraphViewComponent::graphHasWire(const WireComponent *wire) {
+  for (int i = 0; i < graph->wires.size(); ++i) {
+  }
+  return -1;
 }
+
+int GraphViewComponent::graphHasNode(const NodeComponent *node) {
+  return -1;
+}
+
+}
+
+DISABLE_WARNING_POP

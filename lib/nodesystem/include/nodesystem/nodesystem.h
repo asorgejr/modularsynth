@@ -3,7 +3,7 @@
 //
 
 #pragma once
-#include "GraphNodeEditor.h"
+#include "GraphNodeView.h"
 #include "GraphViewComponent.h"
 #include "NodeComponent.h"
 #include "NodeDefinition.h"
@@ -11,8 +11,7 @@
 namespace nodesystem {
 
 
-template<class T>
-using Shareable = std::enable_shared_from_this<T>;
+
 
 
 

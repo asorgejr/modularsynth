@@ -22,15 +22,6 @@ add_definitions(-DNODESYSTEM_DEBUG)
 
 ####+ Library Import ####
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules" "${CMAKE_MODULE_PATH}")
-#set(JUCE_COMPONENTS
-#  juce_audio_basics juce_audio_devices juce_audio_formats juce_audio_processors
-#  juce_audio_utils juce_core juce_cryptography juce_data_structures juce_events
-#  juce_graphics juce_gui_basics juce_gui_extra juce_opengl
-#)
-#set(JUCE_VER 5.4)
-#find_package(JUCE "${JUCE_VER}" REQUIRED
-#  COMPONENTS ${JUCE_COMPONENTS}
-#)
 find_package(nameof CONFIG REQUIRED)
 
 
@@ -55,13 +46,6 @@ set(JUCE_VER 5.4)
 find_package(JUCE "${JUCE_VER}" REQUIRED
   COMPONENTS ${JUCE_COMPONENTS}
 )
-
-set(libmodularsynth_EXTERNAL ON)
-add_subdirectory(lib/libmodularsynth)
-add_library(libmodularsynth STATIC
-  "${libmodularsynth_INCLUDES}" "${libmodularsynth_SOURCES}"
-)
-target_link_libraries(libmodularsynth PUBLIC ${JUCE_LIBRARIES})
 
 
 set(nodesystem_EXTERNAL ON)
@@ -94,18 +78,16 @@ set(SOURCES "${sSOURCES}" "${sHEADERS}")
 
 
 ####+ Generate Executables ####
-add_executable(${PROJECT_NAME} WIN32 ${CMAKE_SOURCE_DIR}/app/Main.cpp ${SOURCES})
-add_dependencies(${PROJECT_NAME} libmodularsynth)
+add_executable(${PROJECT_NAME} WIN32 ${SOURCES})
+add_dependencies(${PROJECT_NAME} nodesystem)
 set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE TRUE)
 target_link_libraries(${PROJECT_NAME}
-  libmodularsynth
   nodesystem
   nameof::nameof
 )
 source_group(Source FILES ${SOURCES})
 target_include_directories(${PROJECT_NAME} 
   PUBLIC
-    "${libmodularsynth_INCLUDE_DIR}"
     "${nodesystem_INCLUDE_DIR}"
 )
 
@@ -113,9 +95,19 @@ target_include_directories(${PROJECT_NAME}
 
 ####+ Install Resources ####
 include(resource_tools)
-file(GLOB_RECURSE RESOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/app/Assets/*.*")
-add_resources(OUT_VAR "${CMAKE_CURRENT_BINARY_DIR}/Assets" "${RESOURCE_FILES}")
-target_sources(${PROJECT_NAME} PUBLIC "${RESOURCE_FILES}")
+set(RESOURCES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Resources")
+set(OUTPUT_RESOURCES_DIR "${CMAKE_CURRENT_BINARY_DIR}/Resources")
+file(GLOB RESOURCE_IMAGES "${RESOURCES_DIR}/images/*.*")
+file(GLOB RESOURCE_AUDIO "${RESOURCES_DIR}/audio/*.*")
+file(GLOB RESOURCE_ICONS "${RESOURCES_DIR}/icons/*.*")
+add_resources(OUT_VAR "${OUTPUT_RESOURCES_DIR}/images" "${RESOURCE_IMAGES}")
+add_resources(OUT_VAR "${OUTPUT_RESOURCES_DIR}/audio" "${RESOURCE_AUDIO}")
+add_resources(OUT_VAR "${OUTPUT_RESOURCES_DIR}/icons" "${RESOURCE_ICONS}")
+target_sources(${PROJECT_NAME} PUBLIC
+  "${RESOURCE_IMAGES}"
+  "${RESOURCE_AUDIO}"
+  #"${RESOURCE_ICONS}"
+)
 
 
 

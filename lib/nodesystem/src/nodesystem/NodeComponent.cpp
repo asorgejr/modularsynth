@@ -6,7 +6,8 @@ using namespace std;
 namespace nodesystem {
 
 NodeComponent::NodeComponent(const GraphViewTheme &theme, Graph::Node *model)
-  : theme(theme), model(model) {
+: theme(theme),
+  model(model) {
 
   model->addListener(this);
 
@@ -61,10 +62,8 @@ void NodeComponent::paint(Graphics &g) {
   //p.addRectangle(bounds);
   p.addRoundedRectangle(bounds, 3);
 
-  if (selected)
-    g.setColour(Colour(theme.cNodeBackgroundSelected));
-  else
-    g.setColour(Colour(cNodeBackgroundCurrent));
+  if (selected) g.setColour(Colour(theme.cNodeBackgroundSelected));
+  else g.setColour(Colour(cNodeBackgroundCurrent));
 
   g.fillPath(p);
   g.setColour(Colours::white);
@@ -72,8 +71,7 @@ void NodeComponent::paint(Graphics &g) {
 }
 
 void NodeComponent::resized() {
-
-  {
+  { // ins
     auto x = theme.pinSpacing;
     auto y = 0;
     auto w = theme.pinWidth;
@@ -85,7 +83,7 @@ void NodeComponent::resized() {
     }
   }
 
-  {
+  { // outs
     auto x = theme.pinSpacing;
     auto y = getHeight() - theme.pinHeight;
     auto w = theme.pinWidth;
@@ -96,7 +94,6 @@ void NodeComponent::resized() {
       x += w + theme.pinSpacing;
     }
   }
-
 }
 
 bool NodeComponent::hitTest(int x, int y) {
@@ -125,8 +122,6 @@ void NodeComponent::mouseDown(const MouseEvent &e) {
 }
 
 void NodeComponent::mouseDrag(const MouseEvent &e) {
-
-
 }
 
 void NodeComponent::mouseUp(const MouseEvent &e) {

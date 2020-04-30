@@ -1,28 +1,30 @@
 #pragma once
 #include <JuceHeader.h>
+#include "NodeSystemAPI.h"
 #include "NodeComponent.h"
 #include "HostNodeComponent.h"
 #include "WireComponent.h"
 #include "SelectionComponent.h"
 #include "UnboundWireComponent.h"
-#include "GraphNodeEditor.h"
+#include "GraphNodeView.h"
 
 namespace nodesystem {
 
 class GraphViewComponent : public Component {
+  
 #pragma region Public Members
   
 public:
   
-  std::unique_ptr<Graph> graph;
+  uptr<Graph> graph;
   
-  std::vector<std::unique_ptr<NodeComponent>> nodes;
+  std::vector<uptr<NodeComponent>> nodes;
   
-  std::vector<std::unique_ptr<WireComponent>> wires;
+  std::vector<uptr<WireComponent>> wires;
   
-  std::unique_ptr<SelectionComponent> selector;
+  uptr<SelectionComponent> selector;
   
-  std::unique_ptr<UnboundWireComponent> wireDrawer;
+  uptr<UnboundWireComponent> wireDrawer;
 
   bool nodeMultiSelectionOn = false;
   
@@ -74,7 +76,7 @@ public:
     
   };
 
-  std::unique_ptr<ChildrenMouseListener> mouseListener;
+  uptr<ChildrenMouseListener> mouseListener;
   
 #pragma endregion Public Members
   
@@ -104,7 +106,7 @@ public:
     const int ins, const int outs,
     const Point<float> position = Point<float>(0, 0));
 
-  HostNodeComponent *addHostNode(std::unique_ptr<GraphNodeEditor> editor, 
+  HostNodeComponent *addHostNode(std::unique_ptr<GraphNodeView> view, 
     const int ins, const int outs,
     const int width, const int height,
     const Point<float> position = Point<float>(0, 0));
@@ -152,6 +154,10 @@ public:
   void zoomOut();
 
   void zoomToOriginalSize();
+  
+  int graphHasWire(const WireComponent *wire);
+  
+  int graphHasNode(const NodeComponent *node);
 
 #pragma endregion Public Methods
 

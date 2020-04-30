@@ -8,8 +8,7 @@ namespace nodesystem {
 
 struct NodeDefinition;
 
-class NodeComponent : public std::enable_shared_from_this<NodeComponent>,
-public Component, public Graph::NodeListener {
+class NodeComponent : public Component, public Graph::NodeListener {
 
 #pragma region Public Members
 
@@ -44,7 +43,7 @@ public:
    */
   const GraphViewTheme theme;
   /**
-   * The node data model attached to this NodeComponent.
+   * The Graph::Node instance associated with this NodeComponent.
    */
   Graph::Node *model;
 
@@ -53,6 +52,10 @@ public:
    * passed into this NodeComponent via Node::ins.
    */
   std::vector<std::unique_ptr<PinComponent>> ins;
+  /**
+   * Unique references to each of the Pins specified by the Node
+   * passed into this NodeComponent via Node::outs.
+   */
   std::vector<std::unique_ptr<PinComponent>> outs;
 
   bool selected{};
@@ -80,8 +83,14 @@ public:
 
   ~NodeComponent() override;
 
+  /**
+   * Returns true if NodeComponent::ins is greater than zero.
+   */
   bool hasIns();
 
+  /**
+   * Returns true if NodeComponent::outs is greater than zero. 
+   */
   bool hasOuts();
 
   int boxHeight();

@@ -6,9 +6,11 @@ using namespace std;
 
 namespace nodesystem {
 
-HostNodeComponent::HostNodeComponent(const GraphViewTheme &theme, Graph::Node *model, unique_ptr<GraphNodeEditor> editor) :
-NodeComponent(theme, model), editor(move(editor)) {
-  this->editor->setModel(model);
+HostNodeComponent::HostNodeComponent(const GraphViewTheme &theme, Graph::Node *model, unique_ptr<GraphNodeView> editor) 
+: NodeComponent(theme, model),
+  nodeView(move(editor)) 
+{
+  this->nodeView->setModel(model);
 }
 
 HostNodeComponent::~HostNodeComponent() {
@@ -29,7 +31,7 @@ void HostNodeComponent::paint(Graphics &g) {
 
 void HostNodeComponent::resized() {
   auto bounds = boxBounds();
-  auto guest = editor->guest();
+  auto guest = nodeView->guest();
   bounds.removeFromTop(theme.hostComponentDragAreaHeight);
   guest->setBounds(0, theme.hostComponentDragAreaHeight, bounds.getWidth(), bounds.getHeight() + theme.pinHeight);
   addAndMakeVisible(guest);
@@ -37,7 +39,7 @@ void HostNodeComponent::resized() {
 }
 
 void HostNodeComponent::onData(const Graph::Node *sourceNode, const Graph::Pin *sourcePin, const var &data) {
-  editor->onData(sourceNode, sourcePin, data);
+  nodeView->onData(sourceNode, sourcePin, data);
 }
 
 NodeDefinition HostNodeComponent::getNodeDefinition() {

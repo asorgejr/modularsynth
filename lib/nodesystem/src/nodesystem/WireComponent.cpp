@@ -1,10 +1,19 @@
+#include "../../include/nodesystem/NodeSystemAPI.h"
 #include "../../include/nodesystem/WireComponent.h"
 
-namespace nodesystem {
+DISABLE_WARNING_PUSH
+DISABLE_WARNING_LOSS_OF_DATA
 
-WireComponent::WireComponent(const GraphViewTheme &theme, NodeComponent::PinComponent *startPin,
-                             NodeComponent::PinComponent *endPin, const Graph::Wire *model) :
-  theme(theme), startPin(startPin), endPin(endPin), model(model) {
+namespace nodesystem {
+typedef NodeComponent::PinComponent PinComp;
+
+WireComponent::WireComponent(const GraphViewTheme &theme,
+  PinComp *startPin, PinComp *endPin, const Graph::Wire *model)
+: theme(theme),
+  startPin(startPin),
+  endPin(endPin),
+  model(model)
+{
   
 }
 
@@ -53,8 +62,10 @@ void WireComponent::paint(Graphics &g) {
 }
 
 
-bool WireComponent::isConnecting(NodeComponent::PinComponent *first, NodeComponent::PinComponent *second) {
+bool WireComponent::isConnecting(PinComp *first, PinComp *second) {
   return (startPin == first && endPin == second) || (startPin == second && endPin == first);
 }
 
 }
+
+DISABLE_WARNING_POP

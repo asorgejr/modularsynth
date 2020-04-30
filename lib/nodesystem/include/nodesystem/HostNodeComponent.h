@@ -1,16 +1,16 @@
 #pragma once
 
 #include "NodeComponent.h"
-#include "GraphNodeEditor.h"
+#include "GraphNodeView.h"
 
 namespace nodesystem {
 
 class HostNodeComponent : public NodeComponent {
 
 public:
-  std::unique_ptr<GraphNodeEditor> editor;
+  std::unique_ptr<GraphNodeView> nodeView;
 
-  HostNodeComponent(const GraphViewTheme &theme, Graph::Node *model, std::unique_ptr<GraphNodeEditor> editor);
+  HostNodeComponent(const GraphViewTheme &theme, Graph::Node *model, std::unique_ptr<GraphNodeView> editor);
 
   ~HostNodeComponent();
 

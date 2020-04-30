@@ -3,6 +3,7 @@
 
 #pragma once
 #include "../Utilities.h"
+#include "../config.h"
 #include "Voice.h"
 
 
@@ -31,7 +32,12 @@ struct SynthAudioSource : AudioSource {
     WavAudioFormat wavFormat;
 
     std::unique_ptr<AudioFormatReader> audioReader(
-      wavFormat.createReaderFor(createAssetInputStream("cello.wav"), true));
+      wavFormat.createReaderFor(
+        createAssetInputStream(
+          config::getAudioDir()
+          .getChildFile("cello.wav")
+          .getFullPathName()
+          .toStdString().c_str()), true));
 
     BigInteger allNotes;
     allNotes.setRange(0, 128, true);

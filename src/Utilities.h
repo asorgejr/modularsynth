@@ -19,7 +19,9 @@
 
 #pragma once
 #include <JuceHeader.h>
+#include "config.h"
 
+using namespace modularsynth;
 
 //==============================================================================
 /*
@@ -42,37 +44,22 @@ inline Colour getUIColourIfAvailable(LookAndFeel_V4::ColourScheme::UIColour uiCo
   return fallback;
 }
 
-inline File getExamplesDirectory() noexcept {
-  auto currentFile = File::getSpecialLocation(File::SpecialLocationType::currentApplicationFile);
-  auto exampleDir = currentFile.getParentDirectory().getChildFile("Assets");
-
-  if (exampleDir.exists())
-    return exampleDir;
-
-  int numTries = 0; // keep track of the number of parent directories so we don't go on endlessly
-
-  while (currentFile.getFileName() != "examples" && numTries++ < 15)
-    currentFile = currentFile.getParentDirectory();
-
-  return currentFile;
-}
-
 inline InputStream *createAssetInputStream(const char *resourcePath) {
 #if JUCE_ANDROID
   ZipFile apkZip(File::getSpecialLocation(File::invokedExecutableFile));
-  return apkZip.createStreamForEntry(apkZip.getIndexOfFileName("assets/" + String(resourcePath)));
+  return apkZip.createStreamForEntry(apkZip.getIndexOfFileName(config::kResourcesDirName + "/" + String(resourcePath)));
 #else
 #if JUCE_IOS
   auto assetsDir = File::getSpecialLocation(File::currentExecutableFile)
-    .getParentDirectory().getChildFile("Assets");
+    .getParentDirectory().getChildFile(config::kResourcesDirName);
 #elif JUCE_MAC
   auto assetsDir = File::getSpecialLocation(File::currentExecutableFile)
-    .getParentDirectory().getParentDirectory().getChildFile("Resources").getChildFile("Assets");
+    .getParentDirectory().getParentDirectory().getChildFile("Resources").getChildFile(config::kResourcesDirName);
 
   if (!assetsDir.exists())
-    assetsDir = getExamplesDirectory().getChildFile("Assets");
+    assetsDir = config::getResourcesDirectory().getChildFile(config::kResourcesDirName);
 #else
-  auto assetsDir = getExamplesDirectory();
+  auto assetsDir = config::getResourcesDirectory();
 #endif
 
   auto resourceFile = assetsDir.getChildFile(resourcePath);

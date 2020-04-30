@@ -7,7 +7,7 @@
 #include <nodesystem/nodesystem.h>
 namespace nodesystem {
 
-struct WaveformNode : public GraphNodeEditor, public Component {
+struct WaveformNode : public GraphNodeView, public Component {
   
   AudioProcessorGraph::Node::Ptr audioNode;
 

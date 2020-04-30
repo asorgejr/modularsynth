@@ -9,7 +9,10 @@
 #include <nodesystem/nodesystem.h>
 #include "../common.h"
 #include "Nodes/nodes.h"
+#include "Nodes/OscillatorNode.h"
 
 struct NodeInfo {
-  static std::vector<nodesystem::NodeDefinition> NodeDefinitions;
+  inline static std::vector<nodesystem::NodeDefinition> NodeDefinitions = {
+    OscillatorNode().getNodeDefinition()
+  };
 };

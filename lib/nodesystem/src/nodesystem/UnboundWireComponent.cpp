@@ -1,4 +1,5 @@
 #include "../../include/nodesystem/UnboundWireComponent.h"
+#include "../../include/nodesystem/NodeSystemAPI.h"
 
 namespace nodesystem {
 
@@ -7,7 +8,8 @@ UnboundWireComponent::UnboundWireComponent() {
   endPin = nullptr;
 }
 
-
+DISABLE_WARNING_PUSH
+DISABLE_WARNING_LOSS_OF_DATA
 void UnboundWireComponent::paint(Graphics &g) {
   auto w = getWidth();
   auto h = getHeight();
@@ -60,5 +62,6 @@ void UnboundWireComponent::calculateBounds(const Point<int> &start, const Point<
     setBounds(start.x - w, start.y, w, h);
   }
 }
+DISABLE_WARNING_POP
 
 }
