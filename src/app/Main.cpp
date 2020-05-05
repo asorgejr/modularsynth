@@ -9,7 +9,7 @@
 #include <JuceHeader.h>
 #include "config.h"
 
-#include "Components/MainComponent.h"
+#include "../Components/MainComponent.h"
 
 
 using namespace modularsynth;

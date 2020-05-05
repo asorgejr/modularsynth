@@ -12,7 +12,7 @@
 
 namespace nodesystem {
 
-struct EmbeddedGraphView : public Shareable<EmbeddedGraphView>, public GraphNodeView {
+struct EmbeddedGraphView : public Shareable<EmbeddedGraphView>, public NodeViewComponent {
   EmbeddedGraphView();
 
   ~EmbeddedGraphView() override;
@@ -36,10 +36,12 @@ struct EmbeddedGraphView : public Shareable<EmbeddedGraphView>, public GraphNode
 
   void onData(const Graph::Node *sourceNode, const Graph::Pin *sourcePin, const var &data) override;
   
-  NodeDefinition getNodeDefinition() override {
-    return NodeDefinition("EmbeddedGraphView", 1, 1,
-      [&](const sptr<GraphViewComponent> &host, const Point<float> &pos) -> void {
-          host->addHostNode(std::make_unique<EmbeddedGraphView>(), 1, 1, 400, 400, pos);
+  HostNodeDefinition getNodeDefinition() override {
+    return HostNodeDefinition("EmbeddedGraphView", 
+      1, 1, 
+      400, 400,
+      [&](const sptr<GraphViewComponent> &host, const Point<float> &pos) -> NodeComponent* {
+          return host->addHostNode(std::make_unique<EmbeddedGraphView>(), 1, 1, 400, 400, pos);
     });
   }
 

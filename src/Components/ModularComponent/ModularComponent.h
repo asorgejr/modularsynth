@@ -8,12 +8,10 @@
 
 #include "../../Models/IModularComponent.h"
 #include "../../common.h"
-#include "../../Utilities.h"
+
+using namespace nodesystem;
 
 namespace modularsynth {
-using AudioGraphIOProcessor = AudioProcessorGraph::AudioGraphIOProcessor;
-using AudioNode = AudioProcessorGraph::Node;
-using NodeID = AudioProcessorGraph::NodeID;
 
 class ModularComponent : public Component, public IModularComponent {
   
@@ -23,18 +21,22 @@ public:
   
   struct ModularAudioProcessor : public AudioProcessor {
 
-    sptr<AudioDeviceManager>
-    audioDeviceManager;
-
-    sptr<AudioProcessorGraph>
-    mainProcessor;
+    sptr<AudioProcessorGraph> mainProcessor;
     
     AudioNode::Ptr masterAudioIn;
     AudioNode::Ptr masterAudioOut;
     AudioNode::Ptr masterMidiIn;
     AudioNode::Ptr masterMidiOut;
     
-    ModularAudioProcessor(const sptr<AudioDeviceManager> &audioDeviceManager);
+    const int kChannelCount = 2;
+
+    std::vector<AudioNode::Ptr> audioNodes;
+    
+    // Standalone Required Members
+    sptr<AudioDeviceManager> audioDeviceManager;
+    AudioProcessorPlayer player;
+    
+    explicit ModularAudioProcessor(const sptr<AudioDeviceManager> &audioDeviceManager);
     
     void initialiseGraph();
     
@@ -83,33 +85,93 @@ public:
   };
 
   #pragma endregion ModularAudioProcessor
+
+  #pragma region ModularNodeGraphView
   
   struct ModularNodeGraphView
-  : public nodesystem::GraphViewComponent,
+  : public GraphViewComponent,
     public Shareable<ModularNodeGraphView>
   {
     
-    explicit ModularNodeGraphView(const sptr<AudioProcessorGraph> &audioGraph);
-    
-    sptr<AudioProcessorGraph> audioGraph;
+    sptr<ModularAudioProcessor> modularAudio;
+    std::vector<sptr<NodeComponent>> modules;
+    std::map<const NodeComponent*, AudioNode::Ptr> audioNodeTether;
+
+    explicit ModularNodeGraphView(const sptr<ModularAudioProcessor> &modularAudio);
     
     void popupMenu(const MouseEvent &e) override;
+
+    // TODO: implement this. It will be used to recall presets.
+    void initializeGraphFromPreset();
+
+    #pragma region GraphViewComponent Methods
+
+    void onAfterAddHostNode(const HostNodeComponent *node, const Graph::Node *model) override;
+
+    void onBeforeRemoveNode(const NodeComponent *n) override;
+
+    void onAfterRemoveNode() override;
+
+    void onAfterAddWire(const NodeComponent::PinComponent *source, const NodeComponent::PinComponent *target) override;
+
+    void onBeforeRemoveWire(const WireComponent *w) override;
+
+    void onAfterRemoveWire() override;
+  
+  protected:
     
+    void debugGraph();
+  
+    void debugNodeComponent(const NodeComponent &n, bool recurseUpstream= false);
+    
+    void debugNode(const Graph::Node &p, bool recurseUpstream= false);
+    
+    void debugNodeConnectors(const Graph::Node &n, bool recurseUpstream= false);
+    
+    void debugPin(const Graph::Pin &p, bool recurseUpstream= false);
+    
+    static void debugHeader(const std::string &title);
+    
+  private:
+    
+    int _dbgIndent = 0;
+    
+    static std::string indentN(int x);
+
+    #pragma endregion GraphViewComponent Methods
+
   };
-  
-  sptr<ModularAudioProcessor>
-  modularAudioProcessor;
-  
-  sptr<ModularNodeGraphView>
-  view;
-  
-  sptr<Toolbar>
-  toolbar;
-  
-  std::vector<uptr<AudioNode>>
-  audioNodes;
+
+  #pragma endregion ModularNodeGraphView
+
+  #pragma region Public Members
   
 public:
+  
+  sptr<ModularAudioProcessor> modularAudioProcessor;
+  
+  sptr<ModularNodeGraphView> view;
+  
+  sptr<Toolbar> toolbar;
+  
+  std::vector<uptr<AudioNode>> audioNodes;
+
+  #pragma endregion Public Members
+
+  #pragma region NonPublic Members
+
+protected:
+
+  MidiKeyboardState keyboardState;
+
+  sptr<MidiKeyboardComponent> keyboardComponent;
+  
+  #pragma endregion NonPublic Members
+
+  #pragma region Public Methods
+  
+public:
+  
   ModularComponent(sptr<AudioDeviceManager> audioDeviceManager, sptr<MouseListener> sharedMouseListener);
   
   ~ModularComponent() override;
@@ -122,9 +184,11 @@ public:
   
   void childBoundsChanged(Component* child) override;
   
-  // void getView(const ModularNodeGraphView *self, const std::function<void(sptr<ModularNodeGraphView>)> &func);
-
-  void initialiseGraph();
+  #pragma region Public Methods
+  
+private:
+  
+  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ModularComponent);
 
 };
 

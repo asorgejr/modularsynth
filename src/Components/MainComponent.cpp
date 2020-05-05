@@ -42,7 +42,7 @@ void MainComponent::instantiateChildren(int32 width, int32 height) {
   auto audioSettings = _userSettings->audioDeviceSetup;
   
   _settingsView = make_shared<SettingsComponent>(_userSettings, _audioDeviceManager, _mouseListener);
-  _synthKeyboardView = make_shared<SynthKeyboardComponent>(_audioDeviceManager, _mouseListener);
+//  _synthKeyboardView = make_shared<SynthKeyboardComponent>(_audioDeviceManager, _mouseListener);
   
   _audioDeviceManager->setAudioDeviceSetup(audioSettings, true);
   
@@ -58,14 +58,14 @@ void MainComponent::instantiateChildren(int32 width, int32 height) {
   _tabComponent->setBounds(0, 0, width, height);
   
   _settingsView->setName(thisName + Layout::kSettingsComponentName);
-  _synthKeyboardView->setName(thisName + Layout::kSynthComponentName);
+//  _synthKeyboardView->setName(thisName + Layout::kSynthComponentName);
   _modularNodeGraph->setName(thisName + Layout::kModularGraphName);
   
-  _tabComponent->addTab(Layout::kSynthTabName,
-                       Palette::TabActiveColor,
-                       _synthKeyboardView.get(),
-                       false,
-                       Layout::kSynthKeyboardTabIndex);
+//  _tabComponent->addTab(Layout::kSynthTabName,
+//                       Palette::TabActiveColor,
+//                       _synthKeyboardView.get(),
+//                       false,
+//                       Layout::kSynthKeyboardTabIndex);
   _tabComponent->addTab(Layout::kModularGraphTabName,
                        Palette::TabActiveColor,
                        _modularNodeGraph.get(),
@@ -110,20 +110,6 @@ void MainComponent::mouseUp(const MouseEvent& event) {
 
 void MainComponent::mouseDown(const MouseEvent &event) {
   _mouseListener->mouseDown(event);
-}
-
-template<class T>
-bool MainComponent::isOutOfBounds(Rectangle<T> &bounds) {
-  const auto maxPosition = static_cast<T>(kMaxPosition);
-  Point<T> boundsPosition = bounds.getPosition();
-  T bPosX = boundsPosition.getX();
-  T bPosY = boundsPosition.getY();
-
-  if (bounds.getWidth() > maxWidth<T>()) return true;
-  if (bounds.getHeight() > maxHeight<T>()) return true;
-  if (std::abs(bPosX) > maxPosition) return true;
-  if (std::abs(bPosY) > maxPosition) return true;
-  return false;
 }
 
 

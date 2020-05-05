@@ -7,4 +7,4 @@
 #include "EmbeddedGraphView.h"
 #include "NodePanel.h"
 #include "OutListener.h"
-#include "WaveformNode.h"
+

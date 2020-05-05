@@ -4,11 +4,10 @@
 #pragma once
 #include <JuceHeader.h>
 #include <nodesystem/nodesystem.h>
-#include "../NodeInfo.h"
 
 namespace nodesystem {
 
-struct SliderPanel : public Component, public GraphNodeView, public Slider::Listener {
+struct SliderPanel : public Component, public NodeViewComponent, public Slider::Listener {
 
   Graph::Node *model;
 
@@ -51,10 +50,10 @@ struct SliderPanel : public Component, public GraphNodeView, public Slider::List
     }
   }
 
-  NodeDefinition getNodeDefinition() override {
-    return NodeDefinition("Slider", 1, 1,
-      [&](const sptr<GraphViewComponent> &host, const Point<float> &pos) -> void {
-        host->addHostNode(std::make_unique<SliderPanel>(), 1, 1, 150, 150, pos);
+  HostNodeDefinition getNodeDefinition() override {
+    return HostNodeDefinition("Slider", 1, 1, 150, 150,
+      [&](const sptr<GraphViewComponent> &host, const Point<float> &pos) -> NodeComponent* {
+        return host->addHostNode(std::make_unique<SliderPanel>(), pos);
       });
   }
 
@@ -66,7 +65,7 @@ private:
 
 
 
-struct TextPanel : public Component, public GraphNodeView {
+struct TextPanel : public Component, public NodeViewComponent {
   
   Graph::Node *model {};
 
@@ -91,10 +90,10 @@ struct TextPanel : public Component, public GraphNodeView {
     repaint();
   }
 
-  NodeDefinition getNodeDefinition() override {
-    return NodeDefinition("Text", 1, 0, 
-      [](const sptr<GraphViewComponent> &host, const Point<float> &pos) -> void {
-        host->addHostNode(std::make_unique<TextPanel>(), 1, 0, 200, 100, pos);
+  HostNodeDefinition getNodeDefinition() override {
+    return HostNodeDefinition("Text", 1, 0, 200, 100,
+      [](const sptr<GraphViewComponent> &host, const Point<float> &pos) -> NodeComponent* {
+        return host->addHostNode(std::make_unique<TextPanel>(), pos);
     });
   }
 

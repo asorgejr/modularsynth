@@ -3,7 +3,7 @@
 //
 
 #pragma once
-#include "GraphNodeView.h"
+#include "NodeViewComponent.h"
 #include "GraphViewComponent.h"
 #include "NodeComponent.h"
 #include "NodeDefinition.h"

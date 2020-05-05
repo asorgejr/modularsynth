@@ -1,5 +1,4 @@
 #include "../../include/nodesystem/NodeComponent.h"
-#include "../../include/nodesystem/NodeDefinition.h"
 
 using namespace std;
 
@@ -35,11 +34,11 @@ NodeComponent::~NodeComponent() {
 }
 
 bool NodeComponent::hasIns() {
-  return ins.size() > 0;
+  return !ins.empty();
 }
 
 bool NodeComponent::hasOuts() {
-  return outs.size() > 0;
+  return !outs.empty();
 }
 
 int NodeComponent::boxHeight() {
@@ -145,13 +144,6 @@ void NodeComponent::mouseExit(const MouseEvent &e) {
 void NodeComponent::mouseDoubleClick(const MouseEvent &e) {
   //model->flow(model->name);
   //model->graph->dfs(model, [&](const auto& n) -> void { printf("visiting %s\n", n->name.c_str()); } );
-}
-
-NodeDefinition NodeComponent::getNodeDefinition() {
-  return NodeDefinition("Default NodeDefinition", 1, 1,
-    [](const std::shared_ptr<GraphViewComponent> &host, const Point<float> &position) -> void {
-      host->addNode("Default NodeDefinition", 1, 1, position);
-    });
 }
 
 }

@@ -1,5 +1,6 @@
 #include "../../include/nodesystem/NodeSystemAPI.h"
 #include "../../include/nodesystem/GraphViewComponent.h"
+#include "../../include/nodesystem/NodeDefinition.h" // TODO: make sure no cyclic dep's.
 
 DISABLE_WARNING_PUSH
 DISABLE_WARNING_LOSS_OF_DATA
@@ -50,9 +51,11 @@ GraphViewComponent::addNode(const string &name, const int ins, const int outs, c
 }
 
 HostNodeComponent *
-GraphViewComponent::addHostNode(unique_ptr<GraphNodeView> view, const int ins, const int outs, const int width, const int height, const Point<float> position)
+GraphViewComponent::addHostNode(unique_ptr<NodeViewComponent> view, const int ins, const int outs, const int width, const int height, const Point<float> position)
 {
-  const auto model = graph->addNode("GraphNodeView", ins, outs);
+  onBeforeAddHostNode(view, position);
+  auto def = view->getNodeDefinition();
+  const auto model = graph->addNode(def.name.toStdString(), ins, outs);
   auto node = make_unique<HostNodeComponent>(theme, model, move(view));
   node->setBounds(0, 0, width, height);
   node->translation = AffineTransform::translation(position);
@@ -60,9 +63,34 @@ GraphViewComponent::addHostNode(unique_ptr<GraphNodeView> view, const int ins, c
   node->setTransform(node->translation.followedBy(node->scale));
   node->addMouseListener(mouseListener.get(), true);
   addAndMakeVisible(node.get());
-
+  
   auto ptr = node.get();
   nodes.push_back(move(node));
+
+  onAfterAddHostNode(ptr, model);
+  
+  assertions();
+  return ptr;
+}
+
+HostNodeComponent *
+GraphViewComponent::addHostNode(unique_ptr<NodeViewComponent> view, const Point<float> position)
+{
+  onBeforeAddHostNode(view, position);
+  auto def = view->getNodeDefinition();
+  const auto model = graph->addNode(def.name.toStdString(), def.ins, def.outs);
+  auto node = make_unique<HostNodeComponent>(theme, model, move(view));
+  node->setBounds(0, 0, def.width, def.height);
+  node->translation = AffineTransform::translation(position);
+  node->scale = AffineTransform::scale(theme.initialScaleFactor);
+  node->setTransform(node->translation.followedBy(node->scale));
+  node->addMouseListener(mouseListener.get(), true);
+  addAndMakeVisible(node.get());
+  
+  auto ptr = node.get();
+  nodes.push_back(move(node));
+
+  onAfterAddHostNode(ptr, model);
 
   assertions();
 
@@ -70,6 +98,7 @@ GraphViewComponent::addHostNode(unique_ptr<GraphNodeView> view, const int ins, c
 }
 
 void GraphViewComponent::removeNode(NodeComponent *n) {
+  onBeforeRemoveNode(n);
   n->removeMouseListener(mouseListener.get());
   // we need to do this instead of directly erasing because we have to remove the corresponding UI component as well
   vector<WireComponent *> wiresToDelete;
@@ -106,11 +135,12 @@ void GraphViewComponent::removeNode(NodeComponent *n) {
     }
   }
 
+  onAfterRemoveNode();
   assertions();
-
 }
 
 WireComponent *GraphViewComponent::addWire(NodeComponent::PinComponent *source, NodeComponent::PinComponent *target) {
+  onBeforeAddWire(source, target);
   const auto model = graph->addWire(source->model, target->model);
   auto wire = make_unique<WireComponent>(theme, source, target, model);
 
@@ -121,12 +151,14 @@ WireComponent *GraphViewComponent::addWire(NodeComponent::PinComponent *source, 
   auto ptr = wire.get();
   wires.push_back(move(wire));
 
+  onAfterAddWire(source, target);
+  
   assertions();
-
   return ptr;
 }
 
 void GraphViewComponent::removeWire(WireComponent *w) {
+  onBeforeRemoveWire(w);
   w->removeMouseListener(mouseListener.get());
   auto ref = remove_if(wires.begin(), wires.end(),
      [&](auto &current) -> bool {
@@ -152,6 +184,7 @@ void GraphViewComponent::removeWire(WireComponent *w) {
       }
     }
   }
+  onAfterRemoveWire();
   assertions();
 }
 

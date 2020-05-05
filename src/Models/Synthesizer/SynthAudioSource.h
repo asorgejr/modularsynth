@@ -2,8 +2,8 @@
 // compile with: /LD /clr /doc
 
 #pragma once
-#include "../Utilities.h"
-#include "../config.h"
+#include "../../Utilities.h"
+#include "../../app/config.h"
 #include "Voice.h"
 
 

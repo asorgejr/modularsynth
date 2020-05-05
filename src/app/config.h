@@ -7,7 +7,7 @@
 #include <string>
 #include <chrono>
 
-#include "ModularAPI.h"
+#include "../ModularAPI.h"
 #include "config/Layout.h"
 #include "config/Palette.h"
 

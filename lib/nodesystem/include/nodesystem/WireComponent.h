@@ -19,8 +19,8 @@ public:
   bool inverted = false;
   bool selected = false;
 
-  WireComponent(const GraphViewTheme &theme, NodeComponent::PinComponent *startPin, NodeComponent::PinComponent *endPin,
-                const Graph::Wire *model);
+  WireComponent(const GraphViewTheme &theme, NodeComponent::PinComponent *startPin,
+    NodeComponent::PinComponent *endPin, const Graph::Wire *model);
 
   ~WireComponent();
 

@@ -4,7 +4,6 @@
 
 #pragma once
 #include <JuceHeader.h>
-#include "../config.h"
 #include "../common.h"
 #include "../Models/FunctionListener.h"
 

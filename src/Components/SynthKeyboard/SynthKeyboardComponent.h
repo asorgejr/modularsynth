@@ -3,8 +3,8 @@
 #include <iostream>
 #include "../../Models/IModularComponent.h"
 #include "../../Utilities.h"
-#include "../../AudioLiveScrollingDisplay.h"
-#include "../../Synthesizer/AudioSource.h"
+#include "AudioLiveScrollingDisplay.h"
+#include "../../Models/Synthesizer/SynthAudioSource.h"
 
 
 namespace modularsynth {

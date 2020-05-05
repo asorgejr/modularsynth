@@ -6,8 +6,6 @@
 
 namespace nodesystem {
 
-struct NodeDefinition;
-
 class NodeComponent : public Component, public Graph::NodeListener {
 
 #pragma region Public Members
@@ -69,9 +67,6 @@ public:
 #pragma endregion Public Members
   
 #pragma region Public Abstract Methods
-  
-public:
-  virtual NodeDefinition getNodeDefinition();
 
 #pragma endregion Public Abstract Methods
   

@@ -37,18 +37,19 @@ struct Graph {
 
     const int order;
 
-    Pin(const PinType &pinType, const Node *node, const int order) : pinType(pinType), node(node), order(order) {}
+    Pin(const PinType &pinType, const Node *node, const int order) 
+    : pinType(pinType), node(node), order(order) {}
 
     void flow(const var &data) const {
       if (pinType == PinType::In) {
-#ifdef NODESYSTEM_DEBUG
+      #ifdef NODESYSTEM_DEBUG
         printf("[flow] in-pin:%d data:%s\n", order, data.toString().toStdString().c_str());    //
-#endif
+      #endif
         node->flow(this, data);
       } else {
-#ifdef NODESYSTEM_DEBUG
+      #ifdef NODESYSTEM_DEBUG
         printf("[flow] out-pin:%d data:%s\n", order, data.toString().toStdString().c_str());    //
-#endif
+      #endif
         std::vector<const Pin *> targets;
         node->graph->targets(this, targets);
         for (auto &p : targets) p->flow(data);
@@ -108,7 +109,7 @@ struct Graph {
 
     void removeListener(NodeListener *listener) {
       if (listeners.empty()) return;
-      auto removeItr = remove_if( // TODO: access violation
+      auto removeItr = std::remove_if( // TODO: access violation
         listeners.begin(),
         listeners.end(),
         [&](auto &current) -> bool {
@@ -121,7 +122,7 @@ struct Graph {
 
     void flow(const Pin *source, const var &data) const {
       for (auto &l : listeners) l->onData(this, source, data);
-      //publish(data);
+      publish(data); // TODO: commented out by original author. Check that this is safe.
     }
 
     void publish(const var &data) const {
@@ -154,10 +155,9 @@ struct Graph {
   #pragma endregion Graph Type Definitions
   
   Node *addNode(const std::string &name, const int numIns, const int numOuts) {
-
-#ifdef NODESYSTEM_DEBUG
+  #ifdef NODESYSTEM_DEBUG
     printf("[graph-add-node] name:%s, ins: %d, outs:%d\n", name.c_str(), numIns, numOuts);  //
-#endif
+  #endif
     auto node = std::make_unique<Node>(this, name, numIns, numOuts);
     auto ptr = node.get();
     nodes.push_back(std::move(node));
@@ -165,9 +165,9 @@ struct Graph {
   }
 
   void removeNode(const Node *node) { //works
-#ifdef NODESYSTEM_DEBUG
+  #ifdef NODESYSTEM_DEBUG
     printf("[graph-remove-node] name:%s\n", node->name.c_str());
-#endif
+  #endif
     // remove all connected wires
 		std::vector<const Wire *> wiresToRemove;
     for (auto &e : wires) {
@@ -179,19 +179,19 @@ struct Graph {
       removeWire(e);
     }
     // remove the node
-    auto removeItr = remove_if(
+    auto removeItr = std::remove_if(
       nodes.begin(),
       nodes.end(),
       [&](auto &current) -> bool { return current.get() == node; });
     nodes.erase(removeItr);
-    //report();
+    report();
   }
 
   const Wire *addWire(const Pin *source, const Pin *target) {
-#ifdef NODESYSTEM_DEBUG
+  #ifdef NODESYSTEM_DEBUG
     printf("[graph-add-wire] source-node:%s source-pin:%d, target-node:%s, target-pin:%d\n",
       source->node->name.c_str(), source->order, target->node->name.c_str(), target->order);
-#endif
+  #endif
     auto wire = std::make_unique<Wire>(source, target);
     auto ptr = wire.get();
     wires.push_back(std::move(wire));
@@ -199,32 +199,42 @@ struct Graph {
   }
 
   void removeWire(const Wire *wire) {
-#ifdef NODESYSTEM_DEBUG
+  #ifdef NODESYSTEM_DEBUG
     printf("[graph-remove-wire] source-node:%s source-pin:%d, target-node:%s, target-pin:%d\n",
       wire->source->node->name.c_str(),
       wire->source->order,
       wire->target->node->name.c_str(),
       wire->target->order);
-#endif
-    auto removeItr = remove_if(
-      begin(wires),
-      end(wires),
+  #endif
+    auto removeItr = std::remove_if(
+      wires.begin(),
+      wires.end(),
       [&](auto &current) -> bool { return current.get() == wire; });
     wires.erase(removeItr, end(wires));
-    //report();
+    report();
   }
 
+  /** This method populates parameter, pins with a set of Pins
+      that are connected to parameter, source with a Wire.
+      @param source the Pin to find targets for.
+      @param pins the collection of Pins that are connected to source.
+   */
   void targets(const Pin *source, std::vector<const Pin *> &pins) const {
     pins.clear();
-    for (auto &e : wires) {
-      if (e->source == source) pins.push_back(e->target);
+    for (auto &w : wires) {
+      if (w->source == source) pins.push_back(w->target);
     }
   }
 
+  /** This method populates parameter, nodes with a set of Nodes 
+      that are connected to parameter, source with a Wire.
+      @param source the Node to find targets for.
+      @param nodes the collection of Nodes that are connected to source.
+   */
   void targets(const Node *source, std::vector<const Node *> &nodes) const {
     nodes.clear();
-    for (auto &e : wires) {
-      if (e->source->node == source) nodes.push_back(e->target->node);
+    for (auto &w : wires) {
+      if (w->source->node == source) nodes.push_back(w->target->node);
     }
   }
 
@@ -242,10 +252,12 @@ struct Graph {
     for (auto &n : nodes) bfs(n, visit);
   }
 
+  /** Prints a simple report of the number of nodes and the number of wires in the graph.
+   */
   void report() const {
-#ifdef NODESYSTEM_DEBUG
+  #ifdef NODESYSTEM_DEBUG
     printf("#nodes:%llu, #wires:%llu\n", nodes.size(), wires.size());
-#endif
+  #endif
   }
 
 };

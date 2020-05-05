@@ -19,7 +19,7 @@
 
 #pragma once
 #include <JuceHeader.h>
-#include "config.h"
+#include "app/config.h"
 
 using namespace modularsynth;
 

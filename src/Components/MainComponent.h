@@ -7,7 +7,7 @@
 #include <nameof.hpp>
 #include <nodesystem/GraphViewComponent.h>
 
-#include "../config.h"
+#include "../app/config.h"
 #include "../Utilities.h"
 #include "../common.h"
 
@@ -58,7 +58,7 @@ private:
   ComboBox _midiInputList;
   MidiKeyboardState _keyboardState;
   sptr<SettingsComponent> _settingsView;
-  sptr<SynthKeyboardComponent> _synthKeyboardView;
+  // sptr<SynthKeyboardComponent> _synthKeyboardView;
   sptr<TabbedComponent> _tabComponent;
   sptr<ModularComponent> _modularNodeGraph;
   sptr<UserSettings> _userSettings;
@@ -93,8 +93,6 @@ public:
 #pragma region Private Methods
 
 private:
-  template<typename TValue>
-  static bool isOutOfBounds(Rectangle<TValue> &bounds);
 
   template<typename TValue>
   static void constrainBounds(Rectangle<TValue> &bounds);

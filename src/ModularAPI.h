@@ -2,8 +2,10 @@
 // Created by asorgejr on 4/19/2020.
 //
 
-#ifndef MODULARSYNTH_MODULARAPI_H
-#define MODULARSYNTH_MODULARAPI_H
+#pragma once
+#include <nodesystem/NodeSystemAPI.h>
+
+#pragma region Disable Warning Macros
 
 #if defined(_MSC_VER)
 #define DISABLE_WARNING_PUSH           __pragma(warning( push ))
@@ -35,4 +37,5 @@
   // other warnings you want to deactivate...
 #endif
 
-#endif //MODULARSYNTH_MODULARAPI_H
+#pragma endregion Disable Warning Macros
+

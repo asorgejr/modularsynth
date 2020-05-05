@@ -3,7 +3,6 @@
 
 #pragma once
 #include <JuceHeader.h>
-#include <juce_dsp/juce_dsp.h>
 
 class ProcessorBase  : public AudioProcessor {
 public:
@@ -23,7 +22,7 @@ public:
 
   //==============================================================================
   
-  AudioProcessorEditor* createEditor() override          { return nullptr; }
+  AudioProcessorEditor * createEditor() override          { return nullptr; }
   
   bool hasEditor() const override                        { return false; }
 

@@ -40,9 +40,10 @@ EmbeddedGraphView::View::~View() {
 
 void EmbeddedGraphView::View::popupMenu(const MouseEvent &e) {
   PopupMenu m;
+  auto nodeDefinitions = NodeInfo::getNodeDefinitions();
   auto position = e.getMouseDownPosition().toFloat();
-  for (int32 i = 0; i < NodeInfo::NodeDefinitions.size(); i++) {
-    m.addItem(i + 1, NodeInfo::NodeDefinitions[i].name);
+  for (int32 i = 0; i < nodeDefinitions.size(); i++) {
+    m.addItem(i + 1, nodeDefinitions[i].name);
   }
 //  m.addItem(1, "1 x 1");
 //  m.addItem(2, "2 x 2");

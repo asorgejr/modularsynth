@@ -4,7 +4,7 @@
 #include "AudioSettingsComponent.h"
 
 #include <memory>
-#include "../../config.h"
+#include "../../app/config.h"
 
 using namespace std;
 

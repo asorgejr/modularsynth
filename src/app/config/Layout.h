@@ -20,7 +20,7 @@ const int32 kMaxWidth = 10000;
 /// The minimum width a window can be.
 const int32 kMinWidth = 600;
 
-const bool kResizable = false;
+const bool kResizable = true;
 
 template<typename TValue>
 static constexpr TValue maxWidth() { return static_cast<TValue>(kMaxWidth); }

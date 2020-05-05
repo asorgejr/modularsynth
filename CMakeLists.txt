@@ -39,8 +39,8 @@ endif()
 ####+ Project Library ####
 set(JUCE_COMPONENTS
   juce_audio_basics juce_audio_devices juce_audio_formats juce_audio_processors
-  juce_audio_utils juce_core juce_cryptography juce_data_structures juce_events
-  juce_graphics juce_gui_basics juce_gui_extra juce_opengl
+  juce_audio_utils juce_core juce_cryptography juce_data_structures juce_dsp
+  juce_events juce_graphics juce_gui_basics juce_gui_extra juce_opengl
 )
 set(JUCE_VER 5.4)
 find_package(JUCE "${JUCE_VER}" REQUIRED
