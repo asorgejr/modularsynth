@@ -3,30 +3,17 @@
 //
 
 #pragma once
+#include <cmath>
 #include <type_traits>
-#include <nameof.hpp>
 #include <JuceHeader.h>
+#include <nameof.hpp>
 #include "ModularAPI.h"
 #include "app/config.h"
 #include "Utilities.h"
 
 #define NAMEOF_FIELD(...) ((String)((string) NAMEOF(__VA_ARGS__)))
 
-#define LOG(...) Logger::writeToLog(__VA_ARGS__);
-
-
-template<class T> using sptr = std::shared_ptr<T>;
-template<class T> using uptr = std::unique_ptr<T>;
-template<class T> using Shareable = std::enable_shared_from_this<T>;
-
-typedef AudioDeviceManager::AudioDeviceSetup AudioDeviceSetup;
-
-typedef AudioProcessorGraph::AudioGraphIOProcessor AudioGraphIOProcessor;
-typedef AudioProcessorGraph::Node AudioNode;
-typedef AudioProcessorGraph::NodeID NodeID;
-
-template <typename T>
-concept RefType = requires { std::is_reference<T>::value; };
+const double epsilon = 1e-5;
 
 template <RefType T>
 void printVector(const std::vector<T> &vec) {
@@ -58,7 +45,80 @@ void printVector(const std::vector<T> &vec, std::function<U(T)> unpacker) {
     }
     std::cout << "]" << std::endl;
   } catch(...) {
-    std::cout << "printUnpackVector error: could not stream contents of specified type: '"
+    std::cout << "printVector error: could not stream contents of specified type: '"
     << typeid(U).name() << "'." << std::endl;
   }
+}
+
+/*
+ * Generic implementation to search if a given value exists in a map or not.
+ * Adds all the keys with given value in the vector
+ */
+template<typename K, typename V>
+bool findByValue(std::vector<K> & vec, std::map<K, V> mapOfElemen, V value)
+{
+  bool result = false;
+  auto it = mapOfElemen.begin();
+  // Iterate through the map
+  while(it != mapOfElemen.end())
+  {
+    // Check if value of this entry matches with given value
+    if(it->second == value)
+    {
+      // Yes found
+      result = true;
+      // Push the key in given map
+      vec.push_back(it->first);
+    }
+    // Go to next entry in map
+    it++;
+  }
+  return result;
+}
+
+template <typename T>
+bool isZero(T value) {
+  return std::abs(value) <= epsilon;
+}
+
+template <typename T, typename U>
+Rectangle<T> divideRect(const Rectangle<T> &dividend, const Rectangle<U> &divisor) {
+  Rectangle<T> result(0, 0, 0, 0);
+  if (!(isZero(dividend.getX())))
+    result.setX(dividend.getX() / (float)divisor.getX());
+  if (!(isZero(dividend.getY())))
+    result.setY(dividend.getY() / (float)divisor.getY());
+  if (!(isZero(divisor.getWidth())))
+    result.setWidth(dividend.getWidth() / (float)divisor.getWidth());
+  if (!(isZero(divisor.getHeight())))
+    result.setHeight(dividend.getHeight() / (float)divisor.getHeight());
+  return result;
+}
+
+template<typename T, typename U>
+Rectangle<T> multiplyRect(const Rectangle<T> &first, const Rectangle<U> &second) {
+  auto result = Rectangle<T>(0,0,0,0);
+  result.setX(first.getX() * second.getX());
+  result.setY(first.getY() * second.getY());
+  result.setWidth(first.getWidth() * second.getWidth());
+  result.setHeight(first.getHeight() * second.getHeight());
+  return result;
+}
+
+template<typename T, typename U>
+Rectangle<T> getRemainingRect(const Rectangle<T> &partial, const Rectangle<U> &full) {
+  auto result = divideRect(partial, full);
+  result.setWidth(1 - result.getWidth());
+  result.setHeight(1 - result.getHeight());
+  result = multiplyRect(result, full);
+  return result;
+}
+
+template<typename T, typename U>
+Rectangle<T> getRemainingHeight(const Rectangle<T> &partial, const Rectangle<U> &full) {
+  auto result = divideRect(partial, full);
+  result.setHeight(1 - result.getHeight());
+  result = multiplyRect(result, full);
+  result.setWidth(partial.getWidth());
+  return result;
 }

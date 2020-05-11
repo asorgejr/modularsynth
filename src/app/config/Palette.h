@@ -4,7 +4,7 @@
 
 #pragma once
 #include <JuceHeader.h>
-#include <nodesystem/GraphViewTheme.h>
+#include "../../ModularSystem/NodeSystem/GraphViewTheme.h"
 #include "../config.h"
 
 namespace modularsynth::config {
@@ -26,9 +26,9 @@ public:
   inline static Colour const NumColors = DefaultText;
   inline static Colour const Outline = Colours::whitesmoke;
   inline static Colour const WidgetBackground = MenuBackground;
-  inline static Colour const WindowBackground = MenuBackground;
+  inline static Colour const WindowBackground = Colours::darkgrey;
   inline static LookAndFeel_V4::ColourScheme colorScheme = LookAndFeel_V4::getDarkColourScheme();
-  inline static nodesystem::GraphViewTheme GraphViewTheme = {
+  inline static GraphViewTheme GraphViewTheme = {
     .edgeStrokeWidth = 3.0f,
     .hostComponentDragAreaHeight = 30,
     .nodeHeight = 40,

@@ -14,7 +14,7 @@ UserSettings::UserSettings(const sptr<AudioDeviceManager> &audioDeviceManager) {
   _audioDeviceManager = audioDeviceManager;
   getSettingsFile();
   pushAudioDeviceSetup();
-  audioDeviceListener = make_shared<UserSettings::AudioDeviceListener>(this);
+  audioDeviceListener = make_unique<UserSettings::AudioDeviceListener>(this);
 }
 
 UserSettings::~UserSettings() {

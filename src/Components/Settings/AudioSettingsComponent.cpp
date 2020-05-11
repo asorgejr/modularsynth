@@ -17,14 +17,16 @@ AudioSettingsComponent::AudioSettingsComponent(const sptr<UserSettings> &userSet
 {
   setOpaque(true);
   
-  RuntimePermissions::request(RuntimePermissions::recordAudio,
-    [this](bool granted) {
-      int numInputChannels = granted ? 2 : 0;
-      this->audioDeviceManager->initialise(numInputChannels, 2, nullptr, true, {}, nullptr);
-  });
-  
   this->userSettings = userSettings;
   auto setup = this->userSettings->audioDeviceSetup;
+  
+  RuntimePermissions::request(RuntimePermissions::recordAudio,
+    [&](bool granted) {
+      int numInputChannels = granted ? 2 : 0;
+      this->audioDeviceManager->initialise(numInputChannels,
+        2, nullptr, 
+        true, {}, &setup);
+  });
   
   audioSetupComp = 
     make_unique<AudioDeviceSelectorComponent>(
@@ -33,7 +35,7 @@ AudioSettingsComponent::AudioSettingsComponent(const sptr<UserSettings> &userSet
       true, true, true, false);
   
   addAndMakeVisible(*audioSetupComp);
-
+  
   addAndMakeVisible(diagnosticsBox);
   diagnosticsBox.setMultiLine(true);
   diagnosticsBox.setReturnKeyStartsNewLine(true);

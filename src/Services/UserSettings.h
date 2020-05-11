@@ -87,7 +87,7 @@ struct AudioDeviceListener : public ChangeListener {
 
   };
 
-  sptr<AudioDeviceListener> audioDeviceListener;
+  uptr<AudioDeviceListener> audioDeviceListener;
   
 #pragma endregion AudioDeviceListener
 

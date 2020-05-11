@@ -13,11 +13,27 @@ message(STATUS "System: ${CMAKE_SYSTEM}")
 ####+ Optional CMake Commands ####
 option(TESTS_ENABLED "Builds the tests associated with this project." OFF)
 option(CLION_PROJECT "Enables libraries to build in a way which CLion is compatible with." OFF)
+option(NODESYSTEM_DEBUG "Enables verbose logging for the nodesystem." OFF)
+option(STANDALONE "Compiles the project as a standalone executable." ON)
 
 cmake_policy(SET CMP0079 NEW)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-add_definitions(-DNODESYSTEM_DEBUG)
+if(NODESYSTEM_DEBUG)
+  add_definitions(-DNODESYSTEM_DEBUG)
+endif()
+
+#if (STANDALONE)
+#  add_definitions(-DJucePlugin_Build_Standalone
+#    -DJUCE_USE_CUSTOM_PLUGIN_STANDALONE_APP=1
+#    -DJucePlugin_IsSynth=1
+#    -DJucePlugin_ManufacturerCode
+#    -DJucePlugin_PluginCode
+#    -DJucePlugin_ProducesMidiOutput=0
+#    -DJucePlugin_WantsMidiInput=1
+#    -DJucePlugin_EditorRequiresKeyboardFocus=1
+#  )
+#endif()
 
 
 ####+ Library Import ####
@@ -38,9 +54,20 @@ endif()
 
 ####+ Project Library ####
 set(JUCE_COMPONENTS
-  juce_audio_basics juce_audio_devices juce_audio_formats juce_audio_processors
-  juce_audio_utils juce_core juce_cryptography juce_data_structures juce_dsp
-  juce_events juce_graphics juce_gui_basics juce_gui_extra juce_opengl
+  juce_audio_basics
+  juce_audio_devices
+  juce_audio_formats
+  #juce_audio_plugin_client
+  juce_audio_processors
+  juce_audio_utils
+  juce_core
+  juce_cryptography
+  juce_data_structures
+  juce_dsp
+  juce_events
+  juce_graphics
+  juce_gui_basics
+  juce_gui_extra
 )
 set(JUCE_VER 5.4)
 find_package(JUCE "${JUCE_VER}" REQUIRED
@@ -48,12 +75,12 @@ find_package(JUCE "${JUCE_VER}" REQUIRED
 )
 
 
-set(nodesystem_EXTERNAL ON)
-add_subdirectory(lib/nodesystem)
-add_library(nodesystem STATIC
-  ${nodesystem_INCLUDES} ${nodesystem_SOURCES}
-)
-target_link_libraries(nodesystem PUBLIC ${JUCE_LIBRARIES})
+#set(nodesystem_EXTERNAL ON)
+#add_subdirectory(lib/nodesystem)
+#add_library(nodesystem STATIC
+#  ${nodesystem_INCLUDES} ${nodesystem_SOURCES}
+#)
+#target_link_libraries(nodesystem PUBLIC ${JUCE_LIBRARIES})
 
 
 
@@ -77,19 +104,62 @@ set(SOURCES "${sSOURCES}" "${sHEADERS}")
 
 
 
+####+ Juce Plugin Config ####
+#set(common_definitions
+#  JUCE_QUICKTIME=0
+#  JUCE_PLUGINHOST_VST=0
+#  JUCE_PLUGINHOST_AU=0
+#  )
+#
+#juce_add_audio_plugin(
+#  PRODUCT_NAME                ${PROJECT_NAME}
+#  VERSION                     1.0.0
+#  PLUGIN_NAME                 "ModularSynth"
+#  PLUGIN_DESC                 "ModularSynth"
+#  PLUGIN_MANUFACTURER         "asorgejr"
+#  PLUGIN_MANUFACTURER_EMAIL   "aaa@example.com"
+#  PLUGIN_MANUFACTURER_CODE    ROLI
+#  PLUGIN_CODE                 Jcdm
+#  PLUGIN_IS_SYNTH             1
+#  PLUGIN_IS_MIDI_EFFECT       0
+#  PLUGIN_WANTS_MIDI_IN        1
+#  PLUGIN_PRODUCES_MIDI_OUT    1
+#  PLUGIN_EDITOR_REQUIRES_KEYS 1
+#  ENABLE_IAA                  1
+#  PLUGIN_AU_EXPORT_PREFIX     ModularSynthAU
+#  PLUGIN_AU_VIEW_CLASS        ModularSynthAU_V1
+#  COMPANY_NAME                "asorgejr"
+#  COMPANY_WEBSITE             www.asorgejr.com
+#  AAX_IDENTIFIER              com.asorgejr.ModularSynth
+#  AAX_CATEGORY                AAX_ePlugInCategory_Dynamics
+#  VST3_CATEGORY               "Fx"
+#  BUNDLE_IDENTIFIER           com.asorgejr.ModularSynth
+#  FORMATS                     Standalone AU # AAX VST VST3 # AUv3
+#  DEFINITIONS                 ${common_definitions}
+#  SOURCES                     ${SOURCES}
+#  LIBRARIES                   ${JUCE_LIBRARIES}
+#)
+
+
+
 ####+ Generate Executables ####
 add_executable(${PROJECT_NAME} WIN32 ${SOURCES})
-add_dependencies(${PROJECT_NAME} nodesystem)
+#add_dependencies(${PROJECT_NAME} nodesystem)
 set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE TRUE)
 target_link_libraries(${PROJECT_NAME}
-  nodesystem
   nameof::nameof
+  ${JUCE_LIBRARIES}
+  #  nodesystem
 )
 source_group(Source FILES ${SOURCES})
-target_include_directories(${PROJECT_NAME} 
+target_include_directories(${PROJECT_NAME}
   PUBLIC
-    "${nodesystem_INCLUDE_DIR}"
+    "${JUCE_INCLUDE_DIR}"
 )
+#target_include_directories(${PROJECT_NAME} 
+#  PUBLIC
+#    "${nodesystem_INCLUDE_DIR}"
+#)
 
 
 
